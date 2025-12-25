@@ -1,0 +1,168 @@
+package com.example.tutorlog.feature.students
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.tutorlog.design.BottomNavigationBar
+import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.feature.students.composables.GroupInfoCardComposable
+import com.example.tutorlog.feature.students.composables.PupilGroupSliderComposable
+import com.example.tutorlog.feature.students.composables.PupilInfoCardComposable
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
+
+@Destination<RootGraph>()
+@Composable
+fun StudentScreen(
+    navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
+    viewModel: StudentViewModel = hiltViewModel()
+) {
+
+    val state by viewModel.collectAsState()
+    viewModel.collectSideEffect {
+        when (it) {
+            StudentScreenSideEffect.NavigateToHomeScreen -> {
+                navigator.navigate(
+                    HomeScreenDestination
+                )
+            }
+        }
+    }
+
+    InitializeStudentScreen(
+        state = state,
+        viewModel = viewModel,
+        modifier = modifier
+    )
+
+}
+
+
+@Composable
+fun InitializeStudentScreen(
+    state: StudentScreenState,
+    viewModel: StudentViewModel,
+    modifier: Modifier = Modifier
+) {
+
+    Scaffold(
+        modifier = modifier
+            .background(color = LocalColors.BackgroundDefaultDark)
+            .windowInsetsPadding(WindowInsets.statusBars),
+        topBar = {
+            PupilGroupSliderComposable(
+                selectedIndex = state.selectedIndex,
+                onClick = {
+                    viewModel.changeIndex(it)
+                },
+                modifier = Modifier
+                    .background(color = LocalColors.BackgroundDefaultDark)
+                    .padding(horizontal = 24.dp)
+                    .padding(vertical = 16.dp)
+            )
+        },
+        bottomBar = {
+            BottomNavigationBar(
+                selectedTab = state.selectedBottomTab.index.toInt(),
+                onTabSelected = {
+                    viewModel.bottomTabSelected(it)
+                }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.End,
+        floatingActionButton = {
+            Box(
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember {
+                            MutableInteractionSource()
+                        },
+                        indication = null,
+                        onClick = {
+
+                        }
+                    )
+                    .background(
+                        color = LocalColors.LightGreen,
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "",
+                    modifier = Modifier.size(16.dp),
+                    tint = LocalColors.White
+                )
+            }
+        }
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .padding(contentPadding)
+                .background(color = LocalColors.BackgroundDefaultDark)
+                .fillMaxSize()
+        ) {
+            AnimatedContent(
+                targetState = state.selectedIndex,
+                label = ""
+            ) { index ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                ) {
+                    if (index == 0) {
+                        state.studentList.forEach { item ->
+                            PupilInfoCardComposable(
+                                name = item.first,
+                                phoneNumber = item.second,
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    } else {
+                        state.groupList.forEach { item ->
+                            GroupInfoCardComposable(
+                                name = item.first,
+                                memberCount = item.second
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+
