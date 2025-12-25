@@ -9,9 +9,13 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CredentialOption
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.GetCredentialInterruptedException
 import androidx.credentials.exceptions.NoCredentialException
 import com.example.tutorlog.R
+import com.example.tutorlog.domain.local.UIGoogleUserInfo
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.Firebase
@@ -29,7 +33,8 @@ class GoogleSignInUtils {
             context: Context,
             scope: CoroutineScope,
             launcher: ManagedActivityResultLauncher<Intent, ActivityResult>?,
-            login: () -> Unit
+            login: (UIGoogleUserInfo) -> Unit,
+            onCancel: () -> Unit,
         ) {
 
             val credentialManager = CredentialManager.create(context)
@@ -48,8 +53,16 @@ class GoogleSignInUtils {
                                 val authCredential = GoogleAuthProvider.getCredential(googleTokenId,null)
                                 val user = Firebase.auth.signInWithCredential(authCredential).await().user
                                 user?.let {
+
                                     if(it.isAnonymous.not()){
-                                        login.invoke()
+                                        val googleUserInfo = UIGoogleUserInfo(
+                                            uid = it.uid,  // Firebase UID (unique)
+                                            googleId = googleIdTokenCredential.id,  // Google ID (unique)
+                                            email = it.email ?: "",
+                                            displayName = it.displayName ?: "",
+                                            photoUrl = it.photoUrl?.toString(),
+                                        )
+                                        login.invoke(googleUserInfo)
                                     }
                                 }
                             }
@@ -58,9 +71,16 @@ class GoogleSignInUtils {
 
                         }
                     }
-                }catch (e:NoCredentialException){
+                } catch (e: NoCredentialException) {
                     launcher?.launch(getIntent())
-                }catch (e: GetCredentialException){
+
+                } catch (e: GetCredentialCancellationException) {
+                    onCancel()
+
+                } catch (e: GetCredentialInterruptedException) {
+                    onCancel()
+
+                } catch (e: GetCredentialException){
                     e.printStackTrace()
                 }
             }

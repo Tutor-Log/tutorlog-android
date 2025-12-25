@@ -1,4 +1,4 @@
-package com.example.tutorlog.feature.login.composables
+package com.example.tutorlog.feature.home.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -25,6 +25,7 @@ import com.example.tutorlog.design.LocalTypography
 @Composable
 fun TopInfoBarComposable(
     imageUrl: String,
+    name: String,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -46,9 +47,9 @@ fun TopInfoBarComposable(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "September",
-            color = LocalColors.Black,
-            style = LocalTypography.headingSmall14
+            text = "Hi, $name",
+            color = LocalColors.White,
+            style = LocalTypography.serifHeadingLarge20
         )
 
     }
@@ -60,5 +61,7 @@ private fun TopInfoBarComposablePreview() {
     TopInfoBarComposable(
         imageUrl = "https://example.com/image.svg",
         modifier = Modifier.fillMaxWidth()
+            .background(LocalColors.Red100),
+        name = "John Doe"
     )
 }

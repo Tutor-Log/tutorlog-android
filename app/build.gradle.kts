@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -20,6 +21,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+        ksp {
+            arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
         }
     }
 
@@ -76,7 +80,23 @@ dependencies {
 
     // Compose Destinations
     implementation(libs.core)
-    ksp(libs.ksp)
+    ksp(libs.destination.ksp)
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
+    implementation(libs.orbit.core)
+    implementation(libs.orbit.viewmodel)
+    implementation(libs.orbit.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.hilt.navigation.compose)
+
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // OkHttp for logging (optional but recommended)
+    implementation(libs.logging.interceptor)
+
+    // Coroutines support for Retrofit
+    implementation(libs.kotlinx.coroutines.android)
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

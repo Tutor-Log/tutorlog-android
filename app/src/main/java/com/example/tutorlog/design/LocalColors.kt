@@ -43,7 +43,53 @@ object LocalColors {
     val Gray300: Color = Color(0xFFE0E0E0)
     val Gray400: Color = Color(0xFFBDBDBD)
     val Gray500: Color = Color(0xFF9E9E9E)
+    val Gray900 = Color(0xFF111827)
+    val Gray800 = Color(0xFF1F2937)
+
+    val White100: Color = Color(0xFFFFFFFF).copy(alpha = 0.1f)
+    val White200: Color = Color(0xFFFFFFFF).copy(alpha = 0.2f)
+    val White300: Color = Color(0xFFFFFFFF).copy(alpha = 0.3f)
+    val White400: Color = Color(0xFFFFFFFF).copy(alpha = 0.4f)
+    val White500: Color = Color(0xFFFFFFFF).copy(alpha = 0.5f)
+
+    val Black100: Color = Color(0xFF000000).copy(alpha = 0.1f)
+    val Black200: Color = Color(0xFF000000).copy(alpha = 0.2f)
+    val Black300: Color = Color(0xFF000000).copy(alpha = 0.3f)
+    val Black400: Color = Color(0xFF000000).copy(alpha = 0.4f)
+    val Black500: Color = Color(0xFF000000).copy(alpha = 0.5f)
+    val Black600: Color = Color(0xFF000000).copy(alpha = 0.6f)
+    val Black700: Color = Color(0xFF000000).copy(alpha = 0.7f)
+    val Black800: Color = Color(0xFF000000).copy(alpha = 0.8f)
+    val Black900: Color = Color(0xFF000000).copy(alpha = 0.9f)
+
+    val LightViolet: Color = Color(0xffCF9FFF)
+
+    val Neutral0: Color = Color(0xFFFFFFFF)
+    val Neutral20: Color = Color(0xFFFAFAFA)
+    val Neutral50: Color = Color(0xFFF2F2F2)
+    val Neutral70: Color = Color(0xFFEFEFEF)
+    val Neutral100: Color = Color(0xFFE5E5E5)
+    val Neutral200: Color = Color(0xFFCBCBCB)
+    val Neutral300: Color = Color(0xFFB1B1B1)
+    val Neutral400: Color = Color(0xFF979797)
+    val Neutral500: Color = Color(0xFF7E7E7E)
+    val Neutral600: Color = Color(0xFF646464)
+    val Neutral700: Color = Color(0xFF4B4B4B)
+    val Neutral800: Color = Color(0xFF333333)
+    val Neutral850: Color = Color(0xFF242424)
+    val Neutral900: Color = Color(0xFF1A1A1A)
+    val Neutral920: Color = Color(0xFF161616)
+    val Neutral950: Color = Color(0xFF101010)
+    val Neutral980: Color = Color(0xFF080808)
+    val Neutral1000: Color = Color(0xFF000000)
+
+    val PrimaryGreen = Color(0xFF38E07B)
+
+
 
     val White: Color = Color(0xFFFFFFFF)
     val Black: Color = Color(0xFF000000)
+
+    val BackgroundDefaultDark = Color(0xFF111714)
+    val LightGreen = Color(0xFF38e07b)
 }
