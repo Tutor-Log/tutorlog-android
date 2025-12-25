@@ -11,13 +11,6 @@ A modern Android application for tutors to manage students, track progress, and 
 - **Modern UI** - Built with Jetpack Compose and Material Design 3
 - **Edge-to-Edge Display** - Immersive full-screen experience
 
-## 🏗️ Architecture
-
-This project follows Clean Architecture principles with MVI (Model-View-Intent) pattern:
-
-- **Presentation Layer**: Jetpack Compose UI with ViewModels
-- **Domain Layer**: Use cases and business logic
-- **Data Layer**: Repositories and data sources
 
 ### Tech Stack
 
@@ -31,12 +24,6 @@ This project follows Clean Architecture principles with MVI (Model-View-Intent) 
 - **Async**: Kotlin Coroutines + Flow
 - **Build System**: Gradle (Kotlin DSL)
 
-## 📋 Prerequisites
-
-- Android Studio Ladybug or newer
-- JDK 11 or higher
-- Android SDK (API 24+)
-- Google Services configuration file (`google-services.json`)
 
 ## 🚀 Getting Started
 
@@ -63,38 +50,6 @@ cd tutorLog
 ```
 
 Or simply open the project in Android Studio and click Run.
-
-## 📦 Project Structure
-
-```
-app/
-├── src/main/java/com/example/tutorlog/
-│   ├── MainActivity.kt                 # Entry point
-│   ├── TutorLogApplication.kt         # Application class
-│   ├── feature/                       # Feature modules
-│   │   ├── login/                    # Login feature
-│   │   │   ├── LoginScreen.kt
-│   │   │   ├── LoginViewModel.kt
-│   │   │   └── LoginScreenState.kt
-│   │   ├── home/                     # Home dashboard
-│   │   │   ├── HomeScreen.kt
-│   │   │   ├── HomeViewModel.kt
-│   │   │   └── composables/
-│   │   └── students/                 # Student management
-│   │       ├── StudentScreen.kt
-│   │       ├── StudentViewModel.kt
-│   │       └── composables/
-│   ├── domain/                       # Business logic
-│   │   ├── usecase/                 # Use cases
-│   │   ├── PreferencesManager.kt    # Local storage
-│   │   └── types/                   # Domain models
-│   ├── repository/                   # Data repositories
-│   ├── service/                      # API services
-│   ├── design/                       # Design system
-│   │   └── theme/                   # Theme configuration
-│   └── utils/                        # Utility classes
-└── res/                              # Resources
-```
 
 ## 🎨 Key Components
 
@@ -126,18 +81,6 @@ app/
 - **targetSdk**: 35 (Android 15)
 - **compileSdk**: 35
 
-### Version Catalog (libs.versions.toml)
-
-Dependencies are managed using Gradle Version Catalog. Key dependencies:
-
-```toml
-[versions]
-kotlin = "2.0.21"
-compose-bom = "2024.12.01"
-hilt = "2.51.1"
-retrofit = "2.9.0"
-orbit = "10.0.0"
-```
 
 ## 🎨 Design System
 
@@ -148,31 +91,7 @@ The app uses a custom design system with:
 - **Components**: Reusable composable components
 - **LocalColors**: Compose local provider for consistent theming
 
-## 📱 Screens
 
-### 1. Login Screen
-- Google Sign-In button
-- Loading state with progress indicator
-- Edge-to-edge design with transparent system bars
-
-### 2. Home Screen
-- User profile section
-- Recent activity overview
-- Quick navigation to students
-- Bottom navigation bar
-
-### 3. Student Screen
-- Toggle between students and groups view
-- Floating action button to add new entries
-- List/Grid view of students
-- Bottom navigation
-
-## 🔐 Security
-
-- Firebase Authentication for secure login
-- Secure token management
-- No hardcoded credentials
-- ProGuard rules for release builds
 
 ## 🚧 Known Issues & Limitations
 
@@ -180,9 +99,6 @@ The app uses a custom design system with:
 - Some features are under development
 - Limited offline support
 
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 👨‍💻 Author
 
