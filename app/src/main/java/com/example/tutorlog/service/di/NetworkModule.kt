@@ -1,7 +1,7 @@
 package com.example.tutorlog.service.di
 
 import android.content.Context
-import com.example.tutorlog.domain.PreferencesManager
+import com.example.tutorlog.domain.local_storage.PreferencesManager
 import com.example.tutorlog.service.UserService
 import dagger.Module
 import dagger.Provides

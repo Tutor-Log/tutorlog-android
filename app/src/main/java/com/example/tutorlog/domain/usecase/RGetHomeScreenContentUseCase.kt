@@ -1,9 +1,9 @@
 package com.example.tutorlog.domain.usecase
 
-import com.example.tutorlog.domain.local.UIGoogleUserInfo
+import com.example.tutorlog.domain.local.UIUserInfo
+import com.example.tutorlog.domain.usecase.base.Either
 import com.example.tutorlog.repository.IUserRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -11,34 +11,38 @@ class RGetHomeScreenContentUseCase @Inject constructor(
     private val userRepository: IUserRepository,
 ) {
     suspend fun process(request: UCRequest): Flow<Either<UCResponse>> {
-        return userRepository.getAllUsers()
+        return userRepository.getUserById(
+            userId = request.userId
+        )
             .map { response ->
                 if (response.isSuccessful) {
-                    val users = response.body() ?: emptyList()
-                    val uiUserList = users.map { user ->
-                        UIGoogleUserInfo(
-                            uid = user.id.toString(),
-                            googleId = user.google_user_id.orEmpty(),
-                            email = user.email.orEmpty(),
-                            displayName = user.full_name.orEmpty(),
-                            photoUrl = null
-                        )
-                    }
-                    Either.Success(UCResponse(userList = uiUserList))
+                    val user = UIUserInfo(
+                        id = response.body()?.id ?: 0,
+                        googleId = response.body()?.google_user_id.orEmpty(),
+                        name = response.body()?.full_name.orEmpty().toTitleCase(),
+                        email = response.body()?.email.orEmpty(),
+                        iamge = response.body()?.profile_pic_url.orEmpty()
+                    )
+                    Either.Success(UCResponse(userInfo = user))
                 } else {
                     Either.Error(Exception("Error fetching users: ${response.code()} ${response.message()}"))
                 }
             }
-            .catch { e ->
-                emit(Either.Error(Exception("Exception occurred: ${e.localizedMessage}")))
-            }
     }
 
     data class UCRequest(
-        val nothing: Nothing? = null
+        val userId: Int
     )
 
     data class UCResponse(
-        val userList: List<UIGoogleUserInfo>
+        val userInfo: UIUserInfo
     )
+}
+
+fun String.toTitleCase(): String {
+    return this.lowercase()
+        .split(" ")
+        .joinToString(" ") { word ->
+            word.replaceFirstChar { it.uppercase() }
+        }
 }

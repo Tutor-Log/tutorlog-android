@@ -45,8 +45,8 @@ object LocalColors {
     val Gray500: Color = Color(0xFF9E9E9E)
     val Gray600 = Color(0xFF4B5563)
     val Gray700 = Color(0xFF374151)
-    val Gray900 = Color(0xFF111827)
     val Gray800 = Color(0xFF1F2937)
+    val Gray900 = Color(0xFF111827)
 
     val White100: Color = Color(0xFFFFFFFF).copy(alpha = 0.1f)
     val White200: Color = Color(0xFFFFFFFF).copy(alpha = 0.2f)

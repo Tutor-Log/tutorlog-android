@@ -5,5 +5,4 @@ data class CreateUserPostBody(
     val email: String?,
     val full_name: String?,
     val profile_pic_url: String?,
-    val last_login_at: String?
 )

@@ -1,5 +1,6 @@
 package com.example.tutorlog.repository
 
+import com.example.tutorlog.domain.remote.CreateUserPostBody
 import com.example.tutorlog.domain.remote.UserInfoResponse
 import com.example.tutorlog.service.UserService
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +31,14 @@ class UserRepository @Inject constructor(
         }
     }
 
-//    override suspend fun createUser(studentInfo: UserInfoResponse): Flow<Response<UserInfoResponse>> {
-//
-//    }
+    override suspend fun createUser(studentInfo: CreateUserPostBody): Flow<Response<UserInfoResponse>> = flow {
+        try {
+            val response = userService.createUser(
+                createUserPostBody = studentInfo
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
+        }
+    }
 }

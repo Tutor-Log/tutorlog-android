@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
-import android.app.Activity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -25,12 +24,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
-@Destination<RootGraph>(start = true)
+@Destination<RootGraph>
 @Composable
 fun LoginScreen(
     navigator: DestinationsNavigator,
@@ -46,7 +43,7 @@ fun LoginScreen(
 
 
     viewModel.collectSideEffect {
-        when(it) {
+        when (it) {
             is LoginScreenSideEffect.SignInWithGoogle -> {
                 GoogleSignInUtils.doGoogleSignIn(
                     context = context,
@@ -62,8 +59,13 @@ fun LoginScreen(
                     }
                 )
             }
+
             is LoginScreenSideEffect.NavigateToHomeScreen -> {
                 navigator.navigate(HomeScreenDestination)
+            }
+
+            is LoginScreenSideEffect.ShowToast -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -82,7 +84,6 @@ fun LoginScreen(
             modifier = Modifier
                 .padding(contentPadding),
             onGoogleSignInClick = {
-                viewModel
                 viewModel.onSignIn()
             },
             isLoading = state.isLoading

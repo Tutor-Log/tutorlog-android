@@ -49,7 +49,7 @@ fun TopInfoBarComposable(
         Text(
             text = "Hi, $name",
             color = LocalColors.White,
-            style = LocalTypography.serifHeadingLarge20
+            style = LocalTypography.headingMedium16
         )
 
     }
