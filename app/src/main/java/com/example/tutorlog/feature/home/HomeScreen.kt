@@ -2,6 +2,7 @@ package com.example.tutorlog.feature.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -55,15 +57,44 @@ fun HomeScreen(
             }
         }
     }
+    if (state.isLoading) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(LocalColors.Gray900),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(48.dp),
+                color = LocalColors.PrimaryGreen,
+                strokeWidth = 4.dp,
+                trackColor = LocalColors.Gray800
+            )
+        }
 
+    } else {
+        InitializeHomeScreen(
+            state = state,
+            viewModel = viewModel
+        )
+    }
+
+}
+
+@Composable
+fun InitializeHomeScreen(
+    state: HomeScreenState,
+    viewModel: HomeViewModel,
+    modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier
             .background(color = LocalColors.BackgroundDefaultDark)
             .windowInsetsPadding(WindowInsets.statusBars),
         topBar = {
             TopInfoBarComposable(
-                imageUrl = "",
-                name = state.userName
+                imageUrl = state.image,
+                name = state.userName.split(" ").first()
             )
         },
         bottomBar = {

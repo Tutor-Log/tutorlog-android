@@ -35,7 +35,9 @@ class StudentViewModel @Inject constructor(): ContainerHost<StudentScreenState, 
     fun bottomTabSelected(tabType: BottomBarTabTypes) {
         when (tabType) {
             BottomBarTabTypes.HOME -> {
-
+                intent {
+                    postSideEffect(StudentScreenSideEffect.NavigateToHomeScreen)
+                }
             }
             BottomBarTabTypes.STUDENTS -> {
                 intent {
@@ -55,6 +57,12 @@ class StudentViewModel @Inject constructor(): ContainerHost<StudentScreenState, 
                     selectedBottomTab = tabType
                 )
             }
+        }
+    }
+
+    fun navigateToAddPupil() {
+        intent {
+            postSideEffect(StudentScreenSideEffect.NavigateToAddPupil)
         }
     }
 }

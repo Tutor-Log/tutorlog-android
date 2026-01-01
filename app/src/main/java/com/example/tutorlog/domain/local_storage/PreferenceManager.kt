@@ -1,4 +1,4 @@
-package com.example.tutorlog.domain
+package com.example.tutorlog.domain.local_storage
 
 import android.content.Context
 import android.content.SharedPreferences

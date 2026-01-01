@@ -1,4 +1,4 @@
-package com.example.tutorlog.domain.usecase
+package com.example.tutorlog.domain.usecase.base
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow

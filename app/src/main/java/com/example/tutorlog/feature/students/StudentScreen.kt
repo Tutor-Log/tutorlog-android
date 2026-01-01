@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,6 +35,7 @@ import com.example.tutorlog.feature.students.composables.PupilGroupSliderComposa
 import com.example.tutorlog.feature.students.composables.PupilInfoCardComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AddPupilScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
@@ -50,10 +52,12 @@ fun StudentScreen(
     val state by viewModel.collectAsState()
     viewModel.collectSideEffect {
         when (it) {
-            StudentScreenSideEffect.NavigateToHomeScreen -> {
-                navigator.navigate(
-                    HomeScreenDestination
-                )
+            is StudentScreenSideEffect.NavigateToHomeScreen -> {
+                navigator.popBackStack()
+            }
+
+            is StudentScreenSideEffect.NavigateToAddPupil -> {
+                navigator.navigate(AddPupilScreenDestination)
             }
         }
     }
@@ -102,26 +106,22 @@ fun InitializeStudentScreen(
         floatingActionButton = {
             Box(
                 modifier = Modifier
-                    .clickable(
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        indication = null,
-                        onClick = {
-
-                        }
-                    )
+                    .size(56.dp)
                     .background(
                         color = LocalColors.LightGreen,
-                        shape = RoundedCornerShape(4.dp)
+                        shape = RoundedCornerShape(16.dp)
                     )
-                    .padding(16.dp)
+                    .clickable {
+                        viewModel.navigateToAddPupil()
+                    },
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "",
-                    modifier = Modifier.size(16.dp),
-                    tint = LocalColors.White
+                    tint = LocalColors.Black,
+                    modifier = Modifier
+                        .size(24.dp)
                 )
             }
         }
@@ -160,7 +160,6 @@ fun InitializeStudentScreen(
                     }
                 }
             }
-
         }
     }
 }

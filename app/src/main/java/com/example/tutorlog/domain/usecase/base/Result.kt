@@ -1,4 +1,4 @@
-package com.example.tutorlog.domain.usecase
+package com.example.tutorlog.domain.usecase.base
 
 
 sealed class Result<out T> {

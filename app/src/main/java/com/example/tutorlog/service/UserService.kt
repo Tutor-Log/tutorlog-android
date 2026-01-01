@@ -15,6 +15,6 @@ interface UserService {
     @GET("user/{id}")
     suspend fun getUserById(@Path("id") userId: Int): Response<UserInfoResponse>
 
-    @POST(value = "/user/")
+    @POST(value = "user/")
     suspend fun createUser(@Body createUserPostBody: CreateUserPostBody): Response<UserInfoResponse>
 }
