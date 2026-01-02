@@ -1,4 +1,4 @@
-package com.example.tutorlog.domain.local
+package com.example.tutorlog.domain.model.local
 
 data class UIPupilClassInfo(
     val timing: String,

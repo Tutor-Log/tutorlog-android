@@ -47,7 +47,7 @@ import com.example.tutorlog.design.LocalColors.Gray600
 import com.example.tutorlog.design.LocalColors.Gray700
 import com.example.tutorlog.design.LocalColors.Gray800
 import com.example.tutorlog.design.LocalColors.Gray900
-import com.example.tutorlog.domain.local.UISettingsItem
+import com.example.tutorlog.domain.model.local.UISettingsItem
 
 
 @OptIn(ExperimentalMaterial3Api::class)

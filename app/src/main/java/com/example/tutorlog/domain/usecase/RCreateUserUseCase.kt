@@ -1,8 +1,7 @@
 package com.example.tutorlog.domain.usecase
 
-import com.example.tutorlog.domain.local.UIGoogleUserInfo
-import com.example.tutorlog.domain.local.UIUserInfo
-import com.example.tutorlog.domain.remote.CreateUserPostBody
+import com.example.tutorlog.domain.model.local.UIUserInfo
+import com.example.tutorlog.domain.model.remote.CreateUserPostBody
 import com.example.tutorlog.domain.usecase.base.Either
 import com.example.tutorlog.repository.IUserRepository
 import kotlinx.coroutines.flow.Flow
@@ -32,10 +31,7 @@ class RCreateUserUseCase @Inject constructor(
                     id = response.body()?.id ?: 0
                 )
                 Either.Success(UCResponse(userInfo = user))
-            } else if (response.code() == 400) {
-                Either.Error(throwable = Exception("Error creating user: ${response.code()}"), errorCode = response.code())
-            }
-            else {
+            } else {
                 Either.Error(throwable = Exception(response.message()), errorCode = response.code())
             }
         }.catch { e ->
@@ -45,10 +41,7 @@ class RCreateUserUseCase @Inject constructor(
 
 
     data class UCRequest(
-        val email: String,
-        val name: String,
-        val googleId: String,
-        val image: String?
+        val email: String, val name: String, val googleId: String, val image: String?
     )
 
     data class UCResponse(

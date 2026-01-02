@@ -1,4 +1,4 @@
-package com.example.tutorlog.domain.local
+package com.example.tutorlog.domain.model.local
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector

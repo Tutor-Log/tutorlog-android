@@ -2,15 +2,14 @@ package com.example.tutorlog.feature.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tutorlog.domain.local.UIGoogleUserInfo
+import com.example.tutorlog.domain.model.local.UIGoogleUserInfo
 import com.example.tutorlog.domain.local_storage.PreferencesManager
-import com.example.tutorlog.domain.local.UIUserInfo
+import com.example.tutorlog.domain.model.local.UIUserInfo
 import com.example.tutorlog.domain.local_storage.LocalKey
 import com.example.tutorlog.domain.usecase.RCreateUserUseCase
 import com.example.tutorlog.domain.usecase.RGetLoginUseCase
 import com.example.tutorlog.domain.usecase.base.Either
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost

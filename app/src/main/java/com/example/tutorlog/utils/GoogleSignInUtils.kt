@@ -14,8 +14,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.GetCredentialInterruptedException
 import androidx.credentials.exceptions.NoCredentialException
 import com.example.tutorlog.R
-import com.example.tutorlog.domain.local.UIGoogleUserInfo
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.example.tutorlog.domain.model.local.UIGoogleUserInfo
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.Firebase

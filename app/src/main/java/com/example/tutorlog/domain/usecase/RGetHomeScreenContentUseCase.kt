@@ -1,6 +1,6 @@
 package com.example.tutorlog.domain.usecase
 
-import com.example.tutorlog.domain.local.UIUserInfo
+import com.example.tutorlog.domain.model.local.UIUserInfo
 import com.example.tutorlog.domain.usecase.base.Either
 import com.example.tutorlog.repository.IUserRepository
 import kotlinx.coroutines.flow.Flow

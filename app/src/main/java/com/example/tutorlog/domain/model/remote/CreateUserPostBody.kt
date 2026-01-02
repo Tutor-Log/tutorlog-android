@@ -1,4 +1,4 @@
-package com.example.tutorlog.domain.remote
+package com.example.tutorlog.domain.model.remote
 
 data class CreateUserPostBody(
     val google_user_id: String?,

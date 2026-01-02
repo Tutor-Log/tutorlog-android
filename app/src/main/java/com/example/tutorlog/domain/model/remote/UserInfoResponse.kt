@@ -1,4 +1,4 @@
-package com.example.tutorlog.domain.remote
+package com.example.tutorlog.domain.model.remote
 
 data class UserInfoResponse(
     val created_at: String?,

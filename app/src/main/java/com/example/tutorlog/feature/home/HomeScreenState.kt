@@ -1,7 +1,7 @@
 package com.example.tutorlog.feature.home
 
-import com.example.tutorlog.domain.local.UIDateInfo
-import com.example.tutorlog.domain.local.UIPupilClassInfo
+import com.example.tutorlog.domain.model.local.UIDateInfo
+import com.example.tutorlog.domain.model.local.UIPupilClassInfo
 import com.example.tutorlog.domain.types.BottomBarTabTypes
 
 data class HomeScreenState(

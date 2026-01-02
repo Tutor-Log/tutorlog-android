@@ -30,7 +30,9 @@ fun CustomTextFieldComposable(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     readOnly: Boolean = false,
     trailingIcon: @Composable (() -> Unit)? = null,
-    onClick: (() -> Unit)? = null
+    prefix: @Composable (() -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+    enabled: Boolean = true
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -56,7 +58,7 @@ fun CustomTextFieldComposable(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(enabled = onClick != null) { onClick?.invoke() },
-            enabled = onClick == null, // Disable standard input if it's a click-only field
+            enabled = enabled,
             readOnly = readOnly,
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
@@ -70,7 +72,8 @@ fun CustomTextFieldComposable(
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White
             ),
-            keyboardOptions = keyboardOptions
+            keyboardOptions = keyboardOptions,
+            prefix = prefix,
         )
     }
 }

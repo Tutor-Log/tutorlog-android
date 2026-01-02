@@ -1,20 +1,45 @@
 package com.example.tutorlog.feature.students.add_pupil
 
 
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -27,7 +52,11 @@ import com.example.tutorlog.feature.students.add_pupil.composable.GroupDropdownC
 import com.example.tutorlog.feature.students.add_pupil.composable.ProfileImagePickerComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AddPupilScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.StudentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Destination<RootGraph>
 @Composable
@@ -36,10 +65,22 @@ fun AddPupilScreen(
     modifier: Modifier = Modifier,
     viewModel: AddPupilViewModel = hiltViewModel()
 ) {
-    var name by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var selectedGroup by remember { mutableStateOf("") }
+    val state by viewModel.collectAsState()
+    val context = LocalContext.current
+    viewModel.collectSideEffect {
+        when(it) {
+            is AddPupilSideEffect.NavigateToStudentScreen -> {
+                navigator.navigate(StudentScreenDestination) {
+                    popUpTo(AddPupilScreenDestination) {
+                        inclusive = true
+                    }
+                }
+            }
+            is AddPupilSideEffect.ShowToast -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier
@@ -73,7 +114,6 @@ fun AddPupilScreen(
             }
         },
         bottomBar = {
-            // Save Button (Fixed at bottom)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -83,7 +123,14 @@ fun AddPupilScreen(
             ) {
                 Button(
                     onClick = {
-
+                        if (state.isButtonLoading.not()) {
+                            viewModel.addPupil(
+                                name = state.name,
+                                email = state.email,
+                                phone = state.phone,
+                                group = null
+                            )
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = LocalColors.PrimaryGreen,
@@ -94,22 +141,29 @@ fun AddPupilScreen(
                         .fillMaxWidth()
                         .height(56.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Save Pupil",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (state.isButtonLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.Black,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Save Pupil",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
     ) { paddingValues ->
-        // Main Content
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -119,17 +173,13 @@ fun AddPupilScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Profile Image Picker
-            ProfileImagePickerComposable()
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Form Fields
             CustomTextFieldComposable(
-                value = name,
-                onValueChange = { name = it },
+                value = state.name,
+                onValueChange = {
+                    viewModel.onNameChange(it)
+                },
                 label = "Pupil Name",
                 placeholder = "e.g. Jane Doe",
                 icon = Icons.Default.Person,
@@ -142,22 +192,34 @@ fun AddPupilScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             CustomTextFieldComposable(
-                value = phone,
-                onValueChange = { phone = it },
+                value = state.phone,
+                onValueChange = {
+                    if (it.length <= 10) {
+                        viewModel.onPhoneChange(it)
+                    }
+                },
                 label = "Phone Number",
                 placeholder = "+1 (555) 000-0000",
                 icon = Icons.Default.Call,
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Phone
-                )
+                ),
+                prefix = {
+                    Text(
+                        text = "+91",
+                        color = Color.White
+                    )
+                }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             CustomTextFieldComposable(
-                value = email,
-                onValueChange = { email = it },
+                value = state.email,
+                onValueChange = {
+                    viewModel.onEmailChange(it)
+                },
                 label = "Email Address",
                 placeholder = "jane@example.com",
                 icon = Icons.Default.Email,
@@ -170,11 +232,13 @@ fun AddPupilScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             GroupDropdownComposable(
-                selectedGroup = selectedGroup,
-                onGroupSelected = { selectedGroup = it }
+                selectedGroup = state.selectedGroup,
+                onGroupSelected = {
+                    viewModel.onDropDownClick(it)
+                },
+                optionList = state.groupOptionList
             )
 
-            // Extra space at bottom so content isn't hidden by button
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
