@@ -3,6 +3,7 @@ package com.example.tutorlog.utils
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.credentials.CredentialManager
@@ -71,16 +72,22 @@ class GoogleSignInUtils {
                         }
                     }
                 } catch (e: NoCredentialException) {
+                    Log.e("GoogleSignIn", "No credential found, launching add account", e)
                     launcher?.launch(getIntent())
 
                 } catch (e: GetCredentialCancellationException) {
+                    Log.d("GoogleSignIn", "User cancelled sign-in")
                     onCancel()
 
                 } catch (e: GetCredentialInterruptedException) {
+                    Log.d("GoogleSignIn", "Sign-in interrupted")
                     onCancel()
 
                 } catch (e: GetCredentialException){
+                    Log.e("GoogleSignIn", "GetCredentialException: ${e.message}", e)
+                    Log.e("GoogleSignIn", "Error type: ${e.type}")
                     e.printStackTrace()
+                    onCancel()
                 }
             }
         }
