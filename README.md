@@ -99,6 +99,29 @@ The app uses a custom design system with:
 - Some features are under development
 - Limited offline support
 
+## 🔍 Troubleshooting
+
+### Google Sign-In NETWORK_ERROR
+
+If you encounter `RequestTokenManager getToken() -> NETWORK_ERROR` when signing in with Google:
+
+1. **Verify OAuth Client ID**: Ensure the `web_client_id` in `app/src/main/res/values/strings.xml` matches the Web client (client_type 3) in your `google-services.json`
+2. **Check SHA-1 Certificate**: Make sure your app's SHA-1 fingerprint is registered in the Firebase Console
+   - Debug SHA-1: `keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android`
+   - Add this fingerprint to your Firebase project settings
+3. **Enable Google Sign-In**: Verify that Google Sign-In is enabled in Firebase Authentication
+4. **Check Logs**: Look for detailed error messages in logcat with the tag `GoogleSignIn`
+
+### Getting Debug SHA-1
+
+```bash
+# For debug builds
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+
+# For release builds
+keytool -list -v -keystore <path-to-your-keystore> -alias <your-key-alias>
+```
+
 
 ## 👨‍💻 Author
 
