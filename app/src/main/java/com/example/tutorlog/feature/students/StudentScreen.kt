@@ -50,6 +50,7 @@ fun StudentScreen(
     viewModel: StudentViewModel = hiltViewModel()
 ) {
 
+
     val state by viewModel.collectAsState()
     viewModel.collectSideEffect {
         when (it) {
