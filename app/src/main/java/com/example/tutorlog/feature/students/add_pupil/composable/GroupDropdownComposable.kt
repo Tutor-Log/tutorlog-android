@@ -57,9 +57,7 @@ fun GroupDropdownComposable(
                         MutableInteractionSource()
                     },
                     onClick = {
-                        println("karl : $selectedGroup $expanded")
                         expanded = !expanded
-                        println("karl 2 : $expanded")
                     }
                 )
         ) {
