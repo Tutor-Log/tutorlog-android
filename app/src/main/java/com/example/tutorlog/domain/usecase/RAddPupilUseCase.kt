@@ -5,18 +5,22 @@ import com.example.tutorlog.domain.usecase.base.Either
 import com.example.tutorlog.repository.IUserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 class RAddPupilUseCase @Inject constructor(
     private val userRepository: IUserRepository
 ) {
+    val currentTime = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     suspend fun process(request: UCRequest): Flow<Either<UCResponse>> {
         return userRepository.addPupil(
             userId = request.userId,
             pupilInfo = AddPupilPostBody(
                 date_of_birth = null,
                 email = request.email,
-                enrolled_on = null,
+                enrolled_on = currentTime,
                 father_name = null,
                 full_name = request.name,
                 gender = null,

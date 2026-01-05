@@ -3,7 +3,6 @@ package com.example.tutorlog.feature.students
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,20 +22,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.BottomNavigationBar
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.design.TFullScreenErrorComposable
+import com.example.tutorlog.design.TFullScreenLoaderComposable
+import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.students.composables.GroupInfoCardComposable
 import com.example.tutorlog.feature.students.composables.PupilGroupSliderComposable
 import com.example.tutorlog.feature.students.composables.PupilInfoCardComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AddGroupScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AddPupilScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -59,14 +60,32 @@ fun StudentScreen(
             is StudentScreenSideEffect.NavigateToAddPupil -> {
                 navigator.navigate(AddPupilScreenDestination)
             }
+            is StudentScreenSideEffect.NavigateToAddGroup -> {
+                navigator.navigate(AddGroupScreenDestination)
+            }
+        }
+    }
+    when(state.screenState) {
+        UIState.SUCCESS -> {
+            InitializeStudentScreen(
+                state = state,
+                viewModel = viewModel,
+                modifier = modifier
+            )
+        }
+
+        UIState.ERROR -> {
+            TFullScreenErrorComposable {
+                viewModel.getStudentData()
+            }
+        }
+        UIState.LOADING -> {
+            TFullScreenLoaderComposable()
+        }
+        UIState.NONE -> {
         }
     }
 
-    InitializeStudentScreen(
-        state = state,
-        viewModel = viewModel,
-        modifier = modifier
-    )
 
 }
 
@@ -112,7 +131,11 @@ fun InitializeStudentScreen(
                         shape = RoundedCornerShape(16.dp)
                     )
                     .clickable {
-                        viewModel.navigateToAddPupil()
+                        if (state.selectedIndex == 0) {
+                            viewModel.navigateToAddPupil()
+                        } else {
+                            viewModel.navigateToAddGroup()
+                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -144,16 +167,17 @@ fun InitializeStudentScreen(
                     if (index == 0) {
                         state.studentList.forEach { item ->
                             PupilInfoCardComposable(
-                                name = item.first,
-                                phoneNumber = item.second,
+                                name = item.fullName,
+                                phoneNumber = item.mobile,
+                                gender = item.gender
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     } else {
                         state.groupList.forEach { item ->
                             GroupInfoCardComposable(
-                                name = item.first,
-                                memberCount = item.second
+                                name = item.name,
+                                memberCount = "8"
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }

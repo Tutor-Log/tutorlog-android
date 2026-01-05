@@ -44,6 +44,7 @@ class GoogleSignInUtils {
             scope.launch {
                 try {
                     val result = credentialManager.getCredential(context,request)
+                    println("karl : $result")
                     when(result.credential){
                         is CustomCredential ->{
                             if(result.credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL){
@@ -71,6 +72,7 @@ class GoogleSignInUtils {
                         }
                     }
                 } catch (e: NoCredentialException) {
+                    println("karl : isme aaya")
                     launcher?.launch(getIntent())
 
                 } catch (e: GetCredentialCancellationException) {

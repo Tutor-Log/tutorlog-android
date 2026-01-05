@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tutorlog.design.LocalColors
@@ -44,8 +46,13 @@ fun CustomTextFieldComposable(
         )
 
         OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
+            value = TextFieldValue(
+                text = value,
+                selection = TextRange(value.length)
+            ),
+            onValueChange = { value ->
+                onValueChange(value.text)
+            },
             placeholder = { Text(placeholder, color = Color.Gray) },
             leadingIcon = {
                 Icon(

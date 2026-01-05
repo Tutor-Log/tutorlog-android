@@ -2,7 +2,6 @@ package com.example.tutorlog.feature.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -31,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.BottomNavigationBar
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.design.TFullScreenLoaderComposable
 import com.example.tutorlog.feature.home.composables.DateSliderComposable
 import com.example.tutorlog.feature.home.composables.PupilClassTimingComposable
 import com.example.tutorlog.feature.home.composables.TopInfoBarComposable
@@ -58,21 +57,7 @@ fun HomeScreen(
         }
     }
     if (state.isLoading) {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .background(LocalColors.Gray900),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                color = LocalColors.PrimaryGreen,
-                strokeWidth = 4.dp,
-                trackColor = LocalColors.Gray800
-            )
-        }
-
+        TFullScreenLoaderComposable()
     } else {
         InitializeHomeScreen(
             state = state,

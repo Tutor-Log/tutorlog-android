@@ -2,7 +2,10 @@ package com.example.tutorlog.service
 
 import com.example.tutorlog.domain.model.remote.AddPupilPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilResponse
+import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
+import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
+import com.example.tutorlog.domain.model.remote.GetPupilResponse
 import com.example.tutorlog.domain.model.remote.UserInfoResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -26,4 +29,20 @@ interface UserService {
         @Query("current_user_id") userId: Int,
         @Body pupilInfo: AddPupilPostBody
     ): Response<AddPupilResponse>
+
+    @GET("pupil/")
+    suspend fun getPupilList(
+        @Query("current_user_id") userId: Int,
+    ): Response<List<GetPupilResponse>>
+
+    @POST("group/")
+    suspend fun createGroup(
+        @Query("current_user_id") userId: Int,
+        @Body groupInfo: CreateGroupPostBody
+    ): Response<CreateGroupResponse>
+
+    @GET(value = "group/")
+    suspend fun getAllGroup(
+        @Query("current_user_id") userId: Int
+    ): Response<List<CreateGroupResponse>>
 }

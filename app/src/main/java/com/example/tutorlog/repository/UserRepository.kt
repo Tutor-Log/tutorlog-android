@@ -2,7 +2,10 @@ package com.example.tutorlog.repository
 
 import com.example.tutorlog.domain.model.remote.AddPupilPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilResponse
+import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
+import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
+import com.example.tutorlog.domain.model.remote.GetPupilResponse
 import com.example.tutorlog.domain.model.remote.UserInfoResponse
 import com.example.tutorlog.service.UserService
 import kotlinx.coroutines.flow.Flow
@@ -49,6 +52,40 @@ class UserRepository @Inject constructor(
             val response = userService.addPupil(
                 userId = userId,
                 pupilInfo = pupilInfo
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
+        }
+    }
+
+    override suspend fun getPupilList(userId: Int): Flow<Response<List<GetPupilResponse>>> = flow {
+        try {
+            val response = userService.getPupilList(
+                userId = userId
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
+        }
+    }
+
+    override suspend fun createGroup(userId: Int, groupInfo: CreateGroupPostBody): Flow<Response<CreateGroupResponse>> = flow {
+        try {
+            val response = userService.createGroup(
+                userId = userId,
+                groupInfo = groupInfo
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
+        }
+    }
+
+    override suspend fun getAllGroup(userId: Int): Flow<Response<List<CreateGroupResponse>>> = flow {
+        try {
+            val response = userService.getAllGroup(
+                userId = userId,
             )
             emit(response)
         } catch (e: Exception) {

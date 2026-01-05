@@ -1,5 +1,4 @@
-package com.example.tutorlog.feature.students.add_pupil
-
+package com.example.tutorlog.feature.students.create_group
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -23,7 +22,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -39,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -47,45 +46,57 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.design.TFullScreenErrorComposable
+import com.example.tutorlog.design.TFullScreenLoaderComposable
+import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.students.add_pupil.composable.CustomTextFieldComposable
-import com.example.tutorlog.feature.students.add_pupil.composable.GroupDropdownComposable
-import com.example.tutorlog.feature.students.add_pupil.composable.ProfileImagePickerComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.AddPupilScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.StudentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Destination<RootGraph>
 @Composable
-fun AddPupilScreen(
+fun AddGroupScreen(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
-    viewModel: AddPupilViewModel = hiltViewModel()
+    viewModel: AddGroupViewModel = hiltViewModel()
 ) {
+
     val state by viewModel.collectAsState()
     val context = LocalContext.current
     viewModel.collectSideEffect {
         when(it) {
-            is AddPupilSideEffect.NavigateToStudentScreen -> {
-                navigator.navigate(StudentScreenDestination) {
-                    popUpTo(AddPupilScreenDestination) {
-                        inclusive = true
-                    }
-                }
+            is AddGroupSideEffect.NavigateToStudentScreen -> {
+                navigator.popBackStack()
             }
-            is AddPupilSideEffect.ShowToast -> {
+            is AddGroupSideEffect.ShowToast -> {
                 Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
+    InitializeAddGroupScreen(
+        state = state,
+        viewModel = viewModel,
+        modifier = modifier,
+        navigator = navigator
+    )
+}
+
+@Composable
+fun InitializeAddGroupScreen(
+    state: AddGroupState,
+    viewModel: AddGroupViewModel,
+    navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         modifier = modifier
             .background(color = LocalColors.BackgroundDefaultDark)
             .windowInsetsPadding(WindowInsets.statusBars),
+        containerColor = LocalColors.BackgroundDefaultDark,
         topBar = {
             Row(
                 modifier = Modifier
@@ -95,7 +106,7 @@ fun AddPupilScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(onClick = {
-
+                    navigator.popBackStack()
                 }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -104,7 +115,7 @@ fun AddPupilScreen(
                     )
                 }
                 Text(
-                    text = "Add New Pupil",
+                    text = "Create new group",
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
@@ -124,11 +135,9 @@ fun AddPupilScreen(
                 Button(
                     onClick = {
                         if (state.isButtonLoading.not()) {
-                            viewModel.addPupil(
-                                name = state.name,
-                                email = state.email,
-                                phone = state.phone,
-                                group = null
+                            viewModel.onCreateGroup(
+                                name = state.groupName,
+                                description = state.groupDescription,
                             )
                         }
                     },
@@ -155,7 +164,7 @@ fun AddPupilScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Save Pupil",
+                            text = "Create Group",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -177,12 +186,12 @@ fun AddPupilScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             CustomTextFieldComposable(
-                value = state.name,
+                value = state.groupName,
                 onValueChange = {
-                    viewModel.onNameChange(it)
+                    viewModel.updateGroupName(it)
                 },
-                label = "Pupil Name",
-                placeholder = "e.g. Jane Doe",
+                label = "Group name",
+                placeholder = "e.g. Music Group",
                 icon = Icons.Default.Person,
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next,
@@ -193,54 +202,18 @@ fun AddPupilScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             CustomTextFieldComposable(
-                value = state.phone,
+                value = state.groupDescription,
                 onValueChange = {
-                    if (it.length <= 10) {
-                        viewModel.onPhoneChange(it)
-                    }
+                    viewModel.updateDescription(it)
                 },
-                label = "Phone Number",
-                placeholder = "+1 (555) 000-0000",
-                icon = Icons.Default.Call,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Phone
-                ),
-                prefix = {
-                    Text(
-                        text = "+91",
-                        color = Color.White
-                    )
-                }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            CustomTextFieldComposable(
-                value = state.email,
-                onValueChange = {
-                    viewModel.onEmailChange(it)
-                },
-                label = "Email Address",
-                placeholder = "jane@example.com",
+                label = "Description",
+                placeholder = "About this group...",
                 icon = Icons.Default.Email,
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Done,
                     keyboardType = KeyboardType.Email
                 )
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            GroupDropdownComposable(
-                selectedGroup = state.selectedGroup,
-                onGroupSelected = {
-                    viewModel.onDropDownClick(it)
-                },
-                optionList = state.groupOptionList
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

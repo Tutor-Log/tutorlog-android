@@ -27,11 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tutorlog.design.LocalColors
 import com.example.tutorlog.design.LocalTypography
+import com.example.tutorlog.utils.getInitials
 
 @Composable
 fun PupilInfoCardComposable(
     name: String,
     phoneNumber: String,
+    gender: String,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -39,7 +41,7 @@ fun PupilInfoCardComposable(
             .fillMaxWidth()
             .background(
                 color = Color(0xff1f2937),
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(16.dp)
             )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -49,15 +51,15 @@ fun PupilInfoCardComposable(
             Box(
                 modifier = Modifier
                     .background(
-                        color = LocalColors.White,
+                        color = if (gender == "F") LocalColors.Red100 else LocalColors.Blue100,
                         shape = CircleShape
                     )
-                    .padding(16.dp),
+                    .size(40.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = name.first().toString(),
-                    color = LocalColors.Red300,
+                    color = LocalColors.Black700,
                     style = LocalTypography.headingMedium16
                 )
             }
@@ -70,7 +72,7 @@ fun PupilInfoCardComposable(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = phoneNumber,
+                    text = "+91-$phoneNumber",
                     color = LocalColors.Neutral300,
                     style = LocalTypography.bodySmall12
                 )
@@ -92,9 +94,10 @@ fun GroupInfoCardComposable(
     memberCount: String,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier
-        .fillMaxWidth()
-        .height(IntrinsicSize.Min)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
     ) {
         Box(
             modifier = Modifier
@@ -102,8 +105,8 @@ fun GroupInfoCardComposable(
                 .width(4.dp)
                 .background(
                     color = LocalColors.Red300, shape = RoundedCornerShape(
-                        topStart = 4.dp,
-                        bottomStart = 4.dp
+                        topStart = 16.dp,
+                        bottomStart = 16.dp
                     )
                 )
         )
@@ -113,8 +116,8 @@ fun GroupInfoCardComposable(
                 .background(
                     color = Color(0xff1f2937),
                     shape = RoundedCornerShape(
-                        bottomEnd = 4.dp,
-                        topEnd = 4.dp
+                        bottomEnd = 16.dp,
+                        topEnd = 16.dp
                     )
                 )
                 .padding(16.dp),
@@ -128,13 +131,13 @@ fun GroupInfoCardComposable(
                             color = LocalColors.White,
                             shape = CircleShape
                         )
-                        .padding(16.dp),
+                        .size(40.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = name.first().toString(),
+                        text = name.getInitials(),
                         color = LocalColors.Red300,
-                        style = LocalTypography.headingMedium16
+                        style = LocalTypography.headingSmall14
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
@@ -142,7 +145,7 @@ fun GroupInfoCardComposable(
                     Text(
                         text = name,
                         color = LocalColors.White,
-                        style = LocalTypography.bodyMedium14
+                        style = LocalTypography.headingSmall14
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -160,7 +163,6 @@ fun GroupInfoCardComposable(
             )
         }
     }
-
 }
 
 @Preview
@@ -169,12 +171,14 @@ private fun PreviewPupilInfoComposable() {
     Column {
         PupilInfoCardComposable(
             name = "John Doe",
-            phoneNumber = "+1234567890"
+            phoneNumber = "+1234567890",
+            gender = "M"
         )
         Spacer(modifier = Modifier.height(16.dp))
         PupilInfoCardComposable(
             name = "John Doe",
-            phoneNumber = "+1234567890"
+            phoneNumber = "+1234567890",
+            gender = "F"
         )
         Spacer(modifier = Modifier.height(16.dp))
         GroupInfoCardComposable(

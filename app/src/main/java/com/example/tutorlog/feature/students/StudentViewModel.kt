@@ -1,9 +1,13 @@
 package com.example.tutorlog.feature.students
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.domain.types.BottomBarTabTypes
-import com.example.tutorlog.feature.home.HomeScreenSideEffect
+import com.example.tutorlog.domain.usecase.RGetStudentGroupUseCase
+import com.example.tutorlog.domain.usecase.base.Either
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -11,14 +15,54 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class StudentViewModel @Inject constructor(): ContainerHost<StudentScreenState, StudentScreenSideEffect>, ViewModel() {
+class StudentViewModel @Inject constructor(
+    private val getStudentGroupUseCase: RGetStudentGroupUseCase
+): ContainerHost<StudentScreenState, StudentScreenSideEffect>, ViewModel() {
     override val container: Container<StudentScreenState, StudentScreenSideEffect> = container(
         StudentScreenState()
     )
 
 
     init {
-        println("karl : Student screen")
+        getStudentData()
+    }
+
+    fun getStudentData() {
+        intent {
+            reduce {
+                state.copy(
+                    screenState = UIState.LOADING
+                )
+            }
+        }
+        viewModelScope.launch {
+            getStudentGroupUseCase.process(
+                request = RGetStudentGroupUseCase.UCRequest
+            ).collect { result ->
+                when(result) {
+                    is Either.Success -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    screenState = UIState.SUCCESS,
+                                    studentList = result.data.pupilList,
+                                    groupList = result.data.groupList
+                                )
+                            }
+                        }
+                    }
+                    is Either.Error -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    screenState = UIState.ERROR,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun changeIndex(index: Int) {
@@ -63,6 +107,11 @@ class StudentViewModel @Inject constructor(): ContainerHost<StudentScreenState, 
     fun navigateToAddPupil() {
         intent {
             postSideEffect(StudentScreenSideEffect.NavigateToAddPupil)
+        }
+    }
+    fun navigateToAddGroup() {
+        intent {
+            postSideEffect(StudentScreenSideEffect.NavigateToAddGroup)
         }
     }
 }
