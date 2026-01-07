@@ -38,7 +38,9 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
 
-@Destination<RootGraph>
+@Destination<RootGraph>(
+    navArgs = GroupDetailNavArgs::class
+)
 @Composable
 fun GroupDetailScreen(
     navigator: DestinationsNavigator,
