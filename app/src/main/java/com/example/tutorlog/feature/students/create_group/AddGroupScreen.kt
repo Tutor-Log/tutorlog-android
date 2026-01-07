@@ -37,7 +37,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -46,10 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.LocalColors
-import com.example.tutorlog.design.TFullScreenErrorComposable
-import com.example.tutorlog.design.TFullScreenLoaderComposable
-import com.example.tutorlog.domain.types.UIState
-import com.example.tutorlog.feature.students.add_pupil.composable.CustomTextFieldComposable
+import com.example.tutorlog.feature.students.create_pupil.composable.CustomTextFieldComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AddGroupScreenDestination

@@ -1,4 +1,4 @@
-package com.example.tutorlog.feature.students.add_pupil
+package com.example.tutorlog.feature.students.create_pupil
 
 sealed interface AddPupilSideEffect {
     data object NavigateToStudentScreen: AddPupilSideEffect

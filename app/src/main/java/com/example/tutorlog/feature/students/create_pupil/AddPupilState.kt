@@ -1,4 +1,4 @@
-package com.example.tutorlog.feature.students.add_pupil
+package com.example.tutorlog.feature.students.create_pupil
 
 data class AddPupilState(
     val name: String = "",

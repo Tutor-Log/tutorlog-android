@@ -1,4 +1,4 @@
-package com.example.tutorlog.feature.students.add_pupil.composable
+package com.example.tutorlog.feature.students.create_pupil.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

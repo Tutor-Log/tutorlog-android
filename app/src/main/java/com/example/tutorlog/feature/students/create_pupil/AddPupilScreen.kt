@@ -1,4 +1,4 @@
-package com.example.tutorlog.feature.students.add_pupil
+package com.example.tutorlog.feature.students.create_pupil
 
 
 import android.widget.Toast
@@ -47,9 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.LocalColors
-import com.example.tutorlog.feature.students.add_pupil.composable.CustomTextFieldComposable
-import com.example.tutorlog.feature.students.add_pupil.composable.GroupDropdownComposable
-import com.example.tutorlog.feature.students.add_pupil.composable.ProfileImagePickerComposable
+import com.example.tutorlog.feature.students.create_pupil.composable.CustomTextFieldComposable
+import com.example.tutorlog.feature.students.create_pupil.composable.GroupDropdownComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AddPupilScreenDestination
