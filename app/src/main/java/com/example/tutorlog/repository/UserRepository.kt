@@ -5,6 +5,7 @@ import com.example.tutorlog.domain.model.remote.AddPupilResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
+import com.example.tutorlog.domain.model.remote.GetAllGroupMemberResponse
 import com.example.tutorlog.domain.model.remote.GetPupilResponse
 import com.example.tutorlog.domain.model.remote.UserInfoResponse
 import com.example.tutorlog.service.UserService
@@ -86,6 +87,30 @@ class UserRepository @Inject constructor(
         try {
             val response = userService.getAllGroup(
                 userId = userId,
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
+        }
+    }
+
+    override suspend fun getAllGroupMember(userId: Int, groupId: Int): Flow<Response<List<GetAllGroupMemberResponse>>> = flow {
+        try {
+            val response = userService.getAllGroupMembers(
+                userId = userId,
+                groupId = groupId
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
+        }
+    }
+
+    override suspend fun getPerGroupInfo(userId: Int, groupId: Int): Flow<Response<CreateGroupResponse>> = flow {
+        try {
+            val response = userService.getPerGroupInfo(
+                userId = userId,
+                groupId = groupId
             )
             emit(response)
         } catch (e: Exception) {

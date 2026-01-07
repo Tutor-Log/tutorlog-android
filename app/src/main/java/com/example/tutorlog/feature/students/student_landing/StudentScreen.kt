@@ -1,4 +1,4 @@
-package com.example.tutorlog.feature.students
+package com.example.tutorlog.feature.students.student_landing
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
@@ -34,10 +34,12 @@ import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.students.composables.GroupInfoCardComposable
 import com.example.tutorlog.feature.students.composables.PupilGroupSliderComposable
 import com.example.tutorlog.feature.students.composables.PupilInfoCardComposable
+import com.example.tutorlog.feature.students.group_detail.GroupDetailNavArgs
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AddGroupScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.AddPupilScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.GroupDetailScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -61,12 +63,23 @@ fun StudentScreen(
             is StudentScreenSideEffect.NavigateToAddPupil -> {
                 navigator.navigate(AddPupilScreenDestination)
             }
+
             is StudentScreenSideEffect.NavigateToAddGroup -> {
                 navigator.navigate(AddGroupScreenDestination)
             }
+
+            is StudentScreenSideEffect.NavigateToGroupDetail -> {
+                navigator.navigate(
+                    GroupDetailScreenDestination(
+                        navArgs = GroupDetailNavArgs(
+                            groupId = it.groupId
+                        )
+                    )
+                )
+            }
         }
     }
-    when(state.screenState) {
+    when (state.screenState) {
         UIState.SUCCESS -> {
             InitializeStudentScreen(
                 state = state,
@@ -80,9 +93,11 @@ fun StudentScreen(
                 viewModel.getStudentData()
             }
         }
+
         UIState.LOADING -> {
             TFullScreenLoaderComposable()
         }
+
         UIState.NONE -> {
         }
     }
@@ -178,7 +193,10 @@ fun InitializeStudentScreen(
                         state.groupList.forEach { item ->
                             GroupInfoCardComposable(
                                 name = item.name,
-                                memberCount = "8"
+                                memberCount = "8",
+                                onClick = {
+                                    viewModel.navigateToGroupDetail(item.groupId)
+                                }
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }

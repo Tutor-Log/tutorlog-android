@@ -1,6 +1,8 @@
 package com.example.tutorlog.feature.students.composables
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -92,12 +95,22 @@ fun PupilInfoCardComposable(
 fun GroupInfoCardComposable(
     name: String,
     memberCount: String,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
+            .clickable(
+                interactionSource = remember {
+                    MutableInteractionSource()
+                },
+                indication = null,
+                onClick = {
+                    onClick.invoke()
+                }
+            )
     ) {
         Box(
             modifier = Modifier
@@ -183,7 +196,10 @@ private fun PreviewPupilInfoComposable() {
         Spacer(modifier = Modifier.height(16.dp))
         GroupInfoCardComposable(
             name = "Math Group",
-            memberCount = "5 Students"
+            memberCount = "5 Students",
+            onClick = {
+
+            },
         )
     }
 

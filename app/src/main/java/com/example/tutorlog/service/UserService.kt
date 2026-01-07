@@ -5,6 +5,7 @@ import com.example.tutorlog.domain.model.remote.AddPupilResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
+import com.example.tutorlog.domain.model.remote.GetAllGroupMemberResponse
 import com.example.tutorlog.domain.model.remote.GetPupilResponse
 import com.example.tutorlog.domain.model.remote.UserInfoResponse
 import retrofit2.Response
@@ -45,4 +46,16 @@ interface UserService {
     suspend fun getAllGroup(
         @Query("current_user_id") userId: Int
     ): Response<List<CreateGroupResponse>>
+
+    @GET("group/{groupId}/members")
+    suspend fun getAllGroupMembers(
+        @Path("groupId") groupId: Int,
+        @Query("current_user_id") userId: Int
+    ): Response<List<GetAllGroupMemberResponse>>
+
+    @GET("group/{groupId}")
+    suspend fun getPerGroupInfo(
+        @Path("groupId") groupId: Int,
+        @Query("current_user_id") userId: Int
+    ): Response<CreateGroupResponse>
 }

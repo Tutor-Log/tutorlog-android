@@ -29,9 +29,6 @@ import com.example.tutorlog.design.TFullScreenErrorComposable
 import com.example.tutorlog.design.TFullScreenLoaderComposable
 import com.example.tutorlog.domain.model.local.UIGroupMemberInfo
 import com.example.tutorlog.domain.types.UIState
-import com.example.tutorlog.feature.students.create_group.AddGroupState
-import com.example.tutorlog.feature.students.create_group.AddGroupViewModel
-import com.example.tutorlog.feature.students.create_group.InitializeAddGroupScreen
 import com.example.tutorlog.feature.students.group_detail.composable.GroupDetailComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -118,24 +115,14 @@ fun InitializeGroupDetailScreen(
             modifier = modifier
                 .padding(paddingValues)
                 .fillMaxSize(),
-            groupName = "Something Crazy",
-            memberList = listOf(
+            groupName = state.groupName,
+            memberList = state.pupilList.map {
                 UIGroupMemberInfo(
-                    name = "John Doe",
-                    memberId = 1,
-                    gender = "M"
-                ),
-                UIGroupMemberInfo(
-                    name = "Jane Smith",
-                    memberId = 2,
-                    gender = "F"
-                ),
-                UIGroupMemberInfo(
-                    name = "Alice Johnson",
-                    memberId = 3,
-                    gender = "F"
+                    name = it.fullName,
+                    memberId = it.id,
+                    gender = it.gender
                 )
-            ),
+            },
             onAddPupilClick = {
 
             }

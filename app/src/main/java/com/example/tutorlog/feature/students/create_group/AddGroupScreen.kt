@@ -52,6 +52,8 @@ import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.students.add_pupil.composable.CustomTextFieldComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AddGroupScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.StudentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -69,7 +71,11 @@ fun AddGroupScreen(
     viewModel.collectSideEffect {
         when(it) {
             is AddGroupSideEffect.NavigateToStudentScreen -> {
-                navigator.popBackStack()
+                navigator.navigate(StudentScreenDestination) {
+                    popUpTo(AddGroupScreenDestination) {
+                        inclusive = true
+                    }
+                }
             }
             is AddGroupSideEffect.ShowToast -> {
                 Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()

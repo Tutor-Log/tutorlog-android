@@ -5,6 +5,7 @@ import com.example.tutorlog.domain.model.remote.AddPupilPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
+import com.example.tutorlog.domain.model.remote.GetAllGroupMemberResponse
 import com.example.tutorlog.domain.model.remote.GetPupilResponse
 import com.example.tutorlog.domain.model.remote.UserInfoResponse
 import kotlinx.coroutines.flow.Flow
@@ -25,5 +26,9 @@ interface IUserRepository {
     suspend fun createGroup(userId: Int, groupInfo: CreateGroupPostBody): Flow<Response<CreateGroupResponse>>
 
     suspend fun getAllGroup(userId: Int): Flow<Response<List<CreateGroupResponse>>>
+
+    suspend fun getAllGroupMember(userId: Int, groupId: Int): Flow<Response<List<GetAllGroupMemberResponse>>>
+
+    suspend fun getPerGroupInfo(userId: Int, groupId: Int): Flow<Response<CreateGroupResponse>>
 
 }

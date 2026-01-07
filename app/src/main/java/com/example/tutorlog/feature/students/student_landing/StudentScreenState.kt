@@ -1,4 +1,4 @@
-package com.example.tutorlog.feature.students
+package com.example.tutorlog.feature.students.student_landing
 
 import com.example.tutorlog.domain.model.local.UIGroupInfo
 import com.example.tutorlog.domain.model.local.UIPupilInfo

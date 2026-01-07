@@ -1,4 +1,4 @@
-package com.example.tutorlog.feature.students
+package com.example.tutorlog.feature.students.student_landing
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -112,6 +112,11 @@ class StudentViewModel @Inject constructor(
     fun navigateToAddGroup() {
         intent {
             postSideEffect(StudentScreenSideEffect.NavigateToAddGroup)
+        }
+    }
+    fun navigateToGroupDetail(groupId: Int) {
+        intent {
+            postSideEffect(StudentScreenSideEffect.NavigateToGroupDetail(groupId = groupId))
         }
     }
 }

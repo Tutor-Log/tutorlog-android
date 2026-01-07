@@ -34,8 +34,6 @@ class RCreateUserUseCase @Inject constructor(
             } else {
                 Either.Error(throwable = Exception(response.message()), errorCode = response.code())
             }
-        }.catch { e ->
-            emit(Either.Error(Exception("Exception occurred: ${e.localizedMessage}")))
         }
     }
 
