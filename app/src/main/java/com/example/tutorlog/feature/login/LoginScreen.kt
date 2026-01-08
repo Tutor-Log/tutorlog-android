@@ -18,6 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.design.TFullScreenErrorComposable
+import com.example.tutorlog.design.TFullScreenLoaderComposable
+import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.login.composables.LoginComposable
 import com.example.tutorlog.utils.GoogleSignInUtils
 import com.ramcosta.composedestinations.annotation.Destination
@@ -71,22 +74,36 @@ fun LoginScreen(
     }
 
 
+    when(state.uiState) {
+        UIState.ERROR -> {
+            TFullScreenErrorComposable(
+                onRetryClick = {
+                    viewModel.checkBEhealth()
+                }
+            )
+        }
 
-
-    Scaffold(
-        modifier = modifier
-            .background(color = LocalColors.Gray900)
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .windowInsetsPadding(WindowInsets.navigationBars)
-            .fillMaxSize()
-    ) { contentPadding ->
-        LoginComposable(
-            modifier = Modifier
-                .padding(contentPadding),
-            onGoogleSignInClick = {
-                viewModel.onSignIn()
-            },
-            isLoading = state.isLoading
-        )
+        UIState.LOADING -> {
+            TFullScreenLoaderComposable()
+        }
+        UIState.SUCCESS -> {
+            Scaffold(
+                modifier = modifier
+                    .background(color = LocalColors.Gray900)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .fillMaxSize()
+            ) { contentPadding ->
+                LoginComposable(
+                    modifier = Modifier
+                        .padding(contentPadding),
+                    onGoogleSignInClick = {
+                        viewModel.onSignIn()
+                    },
+                    isLoading = state.isLoading
+                )
+            }
+        }
+        else -> {}
     }
 }

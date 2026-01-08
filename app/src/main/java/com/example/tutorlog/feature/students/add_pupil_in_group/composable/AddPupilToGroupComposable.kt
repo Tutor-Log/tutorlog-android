@@ -58,10 +58,9 @@ fun AddPupilToGroupComposable(
     onAddClick: () -> Unit,
     onBackClick: () -> Unit,
     onSelectAllClick: () -> Unit,
-    onStudentToggled: (Int) -> Unit
+    onStudentToggled: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-
-
     Scaffold(
         containerColor = LocalColors.Gray900,
         topBar = {
@@ -84,7 +83,7 @@ fun AddPupilToGroupComposable(
         }
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
+            modifier = modifier
                 .padding(paddingValues)
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),

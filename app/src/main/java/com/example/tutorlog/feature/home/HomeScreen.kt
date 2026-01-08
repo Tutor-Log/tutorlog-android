@@ -29,7 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.BottomNavigationBar
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.design.TFullScreenErrorComposable
 import com.example.tutorlog.design.TFullScreenLoaderComposable
+import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.home.composables.DateSliderComposable
 import com.example.tutorlog.feature.home.composables.PupilClassTimingComposable
 import com.example.tutorlog.feature.home.composables.TopInfoBarComposable
@@ -56,15 +58,26 @@ fun HomeScreen(
             }
         }
     }
-    if (state.isLoading) {
-        TFullScreenLoaderComposable()
-    } else {
-        InitializeHomeScreen(
-            state = state,
-            viewModel = viewModel
-        )
-    }
+    when(state.uiState) {
 
+        UIState.SUCCESS -> {
+            InitializeHomeScreen(
+                state = state,
+                viewModel = viewModel
+            )
+        }
+
+        UIState.LOADING -> {
+            TFullScreenLoaderComposable()
+        }
+
+        UIState.ERROR -> {
+            TFullScreenErrorComposable {
+                viewModel.getHomeScreenContent()
+            }
+        }
+        else -> {}
+    }
 }
 
 @Composable

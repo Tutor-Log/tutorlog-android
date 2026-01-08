@@ -13,6 +13,8 @@ import retrofit2.Response
 
 interface IUserRepository {
 
+    suspend fun getHealth(): Flow<Response<String>>
+
     suspend fun getUserById(userId: Int): Flow<Response<UserInfoResponse>>
 
     suspend fun getAllUsers(): Flow<Response<List<UserInfoResponse>>>

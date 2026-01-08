@@ -16,6 +16,10 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface UserService {
+
+    @GET("health")
+    suspend fun getHealth(): Response<String>
+
     @GET("user/")
     suspend fun getAllUsers(): Response<List<UserInfoResponse>>
 
