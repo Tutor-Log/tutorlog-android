@@ -36,8 +36,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun TFullScreenErrorComposable(
-    onRetryClick: () -> Unit = {},
-    onSupportClick: () -> Unit = {}
+    onRetryClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -130,6 +129,8 @@ fun TFullScreenErrorComposable(
 @Composable
 fun PreviewConnectionError() {
     MaterialTheme {
-        TFullScreenErrorComposable()
+        TFullScreenErrorComposable(
+            onRetryClick = {}
+        )
     }
 }

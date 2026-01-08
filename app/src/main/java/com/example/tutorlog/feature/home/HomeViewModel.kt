@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tutorlog.domain.local_storage.LocalKey
 import com.example.tutorlog.domain.local_storage.PreferencesManager
 import com.example.tutorlog.domain.types.BottomBarTabTypes
+import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.domain.usecase.RGetHomeScreenContentUseCase
 import com.example.tutorlog.domain.usecase.base.Either
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,11 +25,15 @@ class HomeViewModel @Inject constructor(
     )
 
     init {
+        getHomeScreenContent()
+    }
+
+    fun getHomeScreenContent() {
         viewModelScope.launch {
             intent {
                 reduce {
                     state.copy(
-                        isLoading = true
+                        uiState = UIState.LOADING
                     )
                 }
             }
@@ -45,12 +50,19 @@ class HomeViewModel @Inject constructor(
                                     state.copy(
                                         userName = result.data.userInfo.name,
                                         image = result.data.userInfo.iamge,
-                                        isLoading = false
+                                        uiState = UIState.SUCCESS
                                     )
                                 }
                             }
                         }
                         is Either.Error -> {
+                            intent {
+                                reduce {
+                                    state.copy(
+                                        uiState = UIState.ERROR
+                                    )
+                                }
+                            }
                         }
                     }
                 }

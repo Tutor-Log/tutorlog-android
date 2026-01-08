@@ -1,6 +1,5 @@
-package com.example.tutorlog.feature.students.add_pupil
+package com.example.tutorlog.feature.students.create_pupil
 
-import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tutorlog.domain.local_storage.LocalKey

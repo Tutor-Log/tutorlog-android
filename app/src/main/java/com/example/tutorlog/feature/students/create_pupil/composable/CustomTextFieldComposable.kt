@@ -1,4 +1,4 @@
-package com.example.tutorlog.feature.students.add_pupil.composable
+package com.example.tutorlog.feature.students.create_pupil.composable
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

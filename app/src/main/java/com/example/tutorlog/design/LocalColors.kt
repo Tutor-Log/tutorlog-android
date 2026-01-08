@@ -86,7 +86,7 @@ object LocalColors {
     val Neutral1000: Color = Color(0xFF000000)
 
     val PrimaryGreen = Color(0xFF38E07B)
-
+    val DividerColor = Color(0xFF374151)
 
 
     val White: Color = Color(0xFFFFFFFF)

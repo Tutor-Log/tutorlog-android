@@ -19,6 +19,16 @@ import javax.inject.Singleton
 class UserRepository @Inject constructor(
     private val userService: UserService
 ): IUserRepository {
+
+    override suspend fun getHealth(): Flow<Response<String>> = flow {
+        try {
+            val response = userService.getHealth()
+            emit(response)
+        } catch (e: Exception) {
+            emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
+        }
+    }
+
     override suspend fun getAllUsers(): Flow<Response<List<UserInfoResponse>>> = flow {
         try {
             val response = userService.getAllUsers()

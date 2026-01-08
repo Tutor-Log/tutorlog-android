@@ -6,9 +6,11 @@ import com.example.tutorlog.domain.model.local.UIGoogleUserInfo
 import com.example.tutorlog.domain.local_storage.PreferencesManager
 import com.example.tutorlog.domain.model.local.UIUserInfo
 import com.example.tutorlog.domain.local_storage.LocalKey
+import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.domain.usecase.RCreateUserUseCase
 import com.example.tutorlog.domain.usecase.RGetLoginUseCase
 import com.example.tutorlog.domain.usecase.base.Either
+import com.example.tutorlog.domain.usecase.base.RGetBEHealth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
@@ -22,12 +24,43 @@ class LoginViewModel @Inject constructor(
     private val getLoginUseCase: RGetLoginUseCase,
     private val createUserUseCase: RCreateUserUseCase,
     private val preferencesManager: PreferencesManager,
+    private val getHealthUseCase: RGetBEHealth
 ): ContainerHost<LoginScreenState, LoginScreenSideEffect>, ViewModel() {
 
     override val container: Container<LoginScreenState, LoginScreenSideEffect> = container(initialState = LoginScreenState())
 
 
     init {
+        checkBEhealth()
+    }
+
+    fun checkBEhealth() {
+        viewModelScope.launch {
+            getHealthUseCase.process(
+                request = RGetBEHealth.UCRequest
+            ).collect {
+                when(it) {
+                    is Either.Success -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    uiState = UIState.SUCCESS
+                                )
+                            }
+                        }
+                    }
+                    is Either.Error -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    uiState = UIState.ERROR
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun createUser(userInfo: UIGoogleUserInfo) {
