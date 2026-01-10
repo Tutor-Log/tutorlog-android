@@ -1,7 +1,6 @@
 package com.example.tutorlog.feature.students.add_pupil_in_group
 
 import com.example.tutorlog.domain.model.local.UIAdditionPupil
-import com.example.tutorlog.domain.model.local.UIPupilInfo
 import com.example.tutorlog.domain.types.UIState
 
 data class AddPupilToGroupState(
@@ -9,5 +8,7 @@ data class AddPupilToGroupState(
     val groupName: String = "",
     val groupDescription: String = "",
     val pupilList: List<UIAdditionPupil> = emptyList(),
+    val allPupilList: List<UIAdditionPupil> = emptyList(),
+    val addedPupilList: List<UIAdditionPupil> = emptyList(),
     val isButtonLoading: Boolean = false
 )

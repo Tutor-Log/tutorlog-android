@@ -65,6 +65,10 @@ fun AddPupilToGroupScreen(
 
     when (state.uiState) {
         UIState.SUCCESS -> {
+            viewModel.filterOnlyNonAddedMembers(
+                allPupilList = state.allPupilList,
+                addedPupilList = state.addedPupilList
+            )
             InitializeAddPupilToGroupScreen(
                 state = state,
                 viewModel = viewModel,

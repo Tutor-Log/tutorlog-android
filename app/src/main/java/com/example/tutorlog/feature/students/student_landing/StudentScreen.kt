@@ -181,15 +181,6 @@ fun InitializeStudentScreen(
                         .padding(horizontal = 24.dp)
                 ) {
                     if (index == 0) {
-                        state.studentList.forEach { item ->
-                            PupilInfoCardComposable(
-                                name = item.fullName,
-                                phoneNumber = item.mobile,
-                                gender = item.gender
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-                    } else {
                         state.groupList.forEach { item ->
                             GroupInfoCardComposable(
                                 name = item.name,
@@ -197,6 +188,15 @@ fun InitializeStudentScreen(
                                 onClick = {
                                     viewModel.navigateToGroupDetail(item.groupId)
                                 }
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    } else {
+                        state.studentList.forEach { item ->
+                            PupilInfoCardComposable(
+                                name = item.fullName,
+                                phoneNumber = item.mobile,
+                                gender = item.gender
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }

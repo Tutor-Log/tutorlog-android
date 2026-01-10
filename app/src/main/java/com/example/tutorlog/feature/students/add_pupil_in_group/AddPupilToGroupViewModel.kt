@@ -38,6 +38,27 @@ class AddPupilToGroupViewModel @Inject constructor(
         getAllPupil()
     }
 
+    fun filterOnlyNonAddedMembers(allPupilList: List<UIAdditionPupil>, addedPupilList: List<UIAdditionPupil>) {
+        intent {
+            reduce {
+                state.copy(
+                    uiState = UIState.LOADING
+                )
+            }
+        }
+        val addedIds = addedPupilList.map { it.id }.toSet()
+        val filteredList = allPupilList.filter { it.id !in addedIds }
+
+        intent {
+            reduce {
+                state.copy(
+                    pupilList = filteredList,
+                    uiState = UIState.SUCCESS
+                )
+            }
+        }
+    }
+
     fun getAllPupil() {
         intent {
             reduce {
@@ -55,7 +76,7 @@ class AddPupilToGroupViewModel @Inject constructor(
                         intent {
                             reduce {
                                 state.copy(
-                                    pupilList = result.data.pupilList.map {
+                                    allPupilList = result.data.pupilList.map {
                                         UIAdditionPupil(
                                             id = it.id,
                                             name = it.fullName,
@@ -105,6 +126,14 @@ class AddPupilToGroupViewModel @Inject constructor(
                                     uiState = UIState.SUCCESS,
                                     groupName = result.data.groupName,
                                     groupDescription = result.data.groupDescription,
+                                    addedPupilList = result.data.pupilList.map {
+                                        UIAdditionPupil(
+                                            id = it.id,
+                                            name = it.fullName,
+                                            details = it.email,
+                                            isSelected = false
+                                        )
+                                    }
                                 )
                             }
                         }

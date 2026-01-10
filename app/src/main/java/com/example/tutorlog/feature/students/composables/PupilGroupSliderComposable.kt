@@ -50,7 +50,7 @@ fun PupilGroupSliderComposable(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Pupils",
+                text = "Groups",
                 style = if (selectedIndex == 0) LocalTypography.headingMedium16 else LocalTypography.bodyMedium14,
                 color = if (selectedIndex == 0) LocalColors.Black else LocalColors.White
             )
@@ -73,7 +73,7 @@ fun PupilGroupSliderComposable(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Groups",
+                text = "Pupils",
                 style = if (selectedIndex == 1) LocalTypography.headingMedium16 else LocalTypography.bodyMedium14,
                 color = if (selectedIndex == 1) LocalColors.Black else LocalColors.White
             )
