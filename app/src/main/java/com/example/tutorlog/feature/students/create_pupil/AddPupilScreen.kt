@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.LocalColors
 import com.example.tutorlog.feature.students.create_pupil.composable.CustomTextFieldComposable
@@ -194,7 +195,7 @@ fun AddPupilScreen(
             CustomTextFieldComposable(
                 value = state.phone,
                 onValueChange = {
-                    if (it.length <= 10) {
+                    if (it.length <= 10 && it.isDigitsOnly()) {
                         viewModel.onPhoneChange(it)
                     }
                 },
@@ -229,15 +230,15 @@ fun AddPupilScreen(
                 )
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            GroupDropdownComposable(
-                selectedGroup = state.selectedGroup,
-                onGroupSelected = {
-                    viewModel.onDropDownClick(it)
-                },
-                optionList = state.groupOptionList
-            )
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            GroupDropdownComposable(
+//                selectedGroup = state.selectedGroup,
+//                onGroupSelected = {
+//                    viewModel.onDropDownClick(it)
+//                },
+//                optionList = state.groupOptionList
+//            )
 
             Spacer(modifier = Modifier.height(24.dp))
         }

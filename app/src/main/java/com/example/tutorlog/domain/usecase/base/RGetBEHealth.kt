@@ -16,7 +16,7 @@ class RGetBEHealth @Inject constructor(
                     UCResponse
                 )
             } else {
-                Either.Error(throwable = Exception())
+                Either.Error(throwable = Exception(), errorCode = it.code(), errorMessage = it.message())
             }
         }
     }

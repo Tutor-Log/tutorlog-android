@@ -8,5 +8,4 @@ data class GroupDetailState(
     val groupName: String = "",
     val groupDescription: String = "",
     val pupilList: List<UIPupilInfo> = emptyList(),
-    val groupId: Int = 0
 )

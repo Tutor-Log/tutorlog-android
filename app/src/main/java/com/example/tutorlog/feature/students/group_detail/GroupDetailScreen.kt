@@ -29,11 +29,14 @@ import com.example.tutorlog.design.TFullScreenErrorComposable
 import com.example.tutorlog.design.TFullScreenLoaderComposable
 import com.example.tutorlog.domain.model.local.UIGroupMemberInfo
 import com.example.tutorlog.domain.types.UIState
+import com.example.tutorlog.feature.students.add_pupil_in_group.AddPupilToGroupNavArgs
 import com.example.tutorlog.feature.students.group_detail.composable.GroupDetailComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AddPupilToGroupScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Destination<RootGraph>(
     navArgs = GroupDetailNavArgs::class
@@ -42,16 +45,31 @@ import org.orbitmvi.orbit.compose.collectAsState
 fun GroupDetailScreen(
     navigator: DestinationsNavigator,
     modifier: Modifier = Modifier,
+    args: GroupDetailNavArgs,
     viewModel: GroupDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.collectAsState()
+    viewModel.collectSideEffect {
+        when(it) {
+            is GroupDetailSideEffect.NavigateToAddPupilToGroupScreen -> {
+                navigator.navigate(
+                    AddPupilToGroupScreenDestination(
+                        navArgs = AddPupilToGroupNavArgs(
+                            groupId = it.groupId
+                        )
+                    )
+                )
+            }
+        }
+    }
     when (state.screenState) {
         UIState.SUCCESS -> {
             InitializeGroupDetailScreen(
                 state = state,
                 viewModel = viewModel,
                 modifier = modifier,
-                navigator = navigator
+                navigator = navigator,
+                args = args
             )
         }
 
@@ -73,10 +91,11 @@ fun GroupDetailScreen(
 }
 
 @Composable
-fun InitializeGroupDetailScreen(
+private fun InitializeGroupDetailScreen(
     state: GroupDetailState,
     viewModel: GroupDetailViewModel,
     navigator: DestinationsNavigator,
+    args: GroupDetailNavArgs,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -124,7 +143,9 @@ fun InitializeGroupDetailScreen(
                 )
             },
             onAddPupilClick = {
-
+                viewModel.navigateToAddPupil(
+                    groupId = args.groupId
+                )
             }
         )
     }
