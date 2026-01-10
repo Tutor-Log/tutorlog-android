@@ -45,7 +45,7 @@ class RGetStudentGroupUseCase @Inject constructor(
                 val groupList = group.body()?.map {
                     UIGroupInfo(
                         name = it.name.orEmpty(),
-                        description = it.name.orEmpty(),
+                        description = it.description.orEmpty(),
                         groupId = it.id ?: 0
                     )
                 } ?: emptyList()

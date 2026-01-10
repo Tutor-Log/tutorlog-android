@@ -2,11 +2,14 @@ package com.example.tutorlog.repository
 
 import com.example.tutorlog.domain.model.remote.AddPupilPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilResponse
+import com.example.tutorlog.domain.model.remote.AddPupilToGroupPostBody
+import com.example.tutorlog.domain.model.remote.AddPupilToGroupResponseItem
 import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
 import com.example.tutorlog.domain.model.remote.GetAllGroupMemberResponse
 import com.example.tutorlog.domain.model.remote.GetPupilResponse
+import com.example.tutorlog.domain.model.remote.HealthResponse
 import com.example.tutorlog.domain.model.remote.UserInfoResponse
 import com.example.tutorlog.service.UserService
 import kotlinx.coroutines.flow.Flow
@@ -20,11 +23,14 @@ class UserRepository @Inject constructor(
     private val userService: UserService
 ): IUserRepository {
 
-    override suspend fun getHealth(): Flow<Response<String>> = flow {
+    override suspend fun getHealth(): Flow<Response<HealthResponse>> = flow {
         try {
             val response = userService.getHealth()
             emit(response)
         } catch (e: Exception) {
+            println("karl : ${e.localizedMessage}")
+            println()
+            e.printStackTrace().toString()
             emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
         }
     }
@@ -121,6 +127,23 @@ class UserRepository @Inject constructor(
             val response = userService.getPerGroupInfo(
                 userId = userId,
                 groupId = groupId
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
+        }
+    }
+
+    override suspend fun addPupilToGroup(
+        userId: Int,
+        groupId: Int,
+        pupilList: List<AddPupilToGroupPostBody>
+    ): Flow<Response<List<AddPupilToGroupResponseItem>>> = flow {
+        try {
+            val response = userService.addPupilToGroup(
+                userId = userId,
+                groupId = groupId,
+                pupilList = pupilList
             )
             emit(response)
         } catch (e: Exception) {

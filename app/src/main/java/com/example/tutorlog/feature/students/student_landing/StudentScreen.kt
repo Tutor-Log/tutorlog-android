@@ -193,7 +193,7 @@ fun InitializeStudentScreen(
                         state.groupList.forEach { item ->
                             GroupInfoCardComposable(
                                 name = item.name,
-                                memberCount = "8",
+                                description = item.description,
                                 onClick = {
                                     viewModel.navigateToGroupDetail(item.groupId)
                                 }

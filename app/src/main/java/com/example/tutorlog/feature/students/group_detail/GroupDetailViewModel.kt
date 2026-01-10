@@ -52,7 +52,6 @@ class GroupDetailViewModel @Inject constructor(
                                     groupName = response.data.groupName,
                                     groupDescription = response.data.groupDescription,
                                     pupilList = response.data.pupilList,
-                                    groupId = response.data.groupId
                                 )
                             }
                         }
@@ -69,6 +68,16 @@ class GroupDetailViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun navigateToAddPupil(groupId: Int) {
+        intent {
+            postSideEffect(
+                GroupDetailSideEffect.NavigateToAddPupilToGroupScreen(
+                    groupId = groupId
+                )
+            )
         }
     }
 }

@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tutorlog.design.LocalColors
@@ -81,12 +82,6 @@ fun PupilInfoCardComposable(
                 )
             }
         }
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = "",
-            modifier = Modifier.size(24.dp),
-            tint = LocalColors.White
-        )
     }
 
 }
@@ -94,7 +89,7 @@ fun PupilInfoCardComposable(
 @Composable
 fun GroupInfoCardComposable(
     name: String,
-    memberCount: String,
+    description: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -162,9 +157,11 @@ fun GroupInfoCardComposable(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = memberCount,
+                        text = description,
                         color = LocalColors.Neutral300,
-                        style = LocalTypography.bodySmall12
+                        style = LocalTypography.bodySmall12,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -196,7 +193,7 @@ private fun PreviewPupilInfoComposable() {
         Spacer(modifier = Modifier.height(16.dp))
         GroupInfoCardComposable(
             name = "Math Group",
-            memberCount = "5 Students",
+            description = "5 Students",
             onClick = {
 
             },

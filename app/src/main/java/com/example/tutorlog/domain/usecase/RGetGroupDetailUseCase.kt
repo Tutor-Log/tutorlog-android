@@ -29,7 +29,6 @@ class RGetGroupDetailUseCase @Inject constructor(
                     data = UCResponse(
                         groupName = groupInfo.body()?.name.orEmpty(),
                         groupDescription = groupInfo.body()?.description.orEmpty(),
-                        groupId = groupInfo.body()?.id ?: 0,
                         pupilList = groupMember.body()?.map { item ->
                             UIPupilInfo(
                                 createdAt = item.pupil_details?.created_at ?: "",
@@ -63,6 +62,5 @@ class RGetGroupDetailUseCase @Inject constructor(
         val groupName: String,
         val groupDescription: String,
         val pupilList: List<UIPupilInfo>,
-        val groupId: Int
     )
 }

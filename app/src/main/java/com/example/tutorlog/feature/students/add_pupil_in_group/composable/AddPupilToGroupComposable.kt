@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,10 +60,11 @@ fun AddPupilToGroupComposable(
     onBackClick: () -> Unit,
     onSelectAllClick: () -> Unit,
     onStudentToggled: (Int) -> Unit,
+    isButtonLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
-        containerColor = LocalColors.Gray900,
+        containerColor = LocalColors.BackgroundDefaultDark,
         topBar = {
             TopHeader(
                 onBackClick = {
@@ -79,14 +81,16 @@ fun AddPupilToGroupComposable(
                 count = studentList.count { it.isSelected == true },
                 onClick = {
                     onAddClick.invoke()
-                })
+                },
+                isButtonLoading = isButtonLoading
+            )
         }
     ) { paddingValues ->
         LazyColumn(
             modifier = modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 24.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
             item {
@@ -143,7 +147,7 @@ fun TopHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(LocalColors.Gray900.copy(alpha = 0.8f))
+            .background(LocalColors.BackgroundDefaultDark,)
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -196,7 +200,7 @@ fun SearchBar() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(LocalColors.Gray800, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    .padding(horizontal = 24.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -261,12 +265,14 @@ fun StudentItem(
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
                 )
-                Text(
-                    text = student.details,
-                    color = LocalColors.Gray400,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
+                if (student.details.isNotEmpty()) {
+                    Text(
+                        text = student.details,
+                        color = LocalColors.Gray400,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
             }
         }
 
@@ -306,14 +312,15 @@ fun StudentItem(
 @Composable
 fun BottomActionButton(
     count: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isButtonLoading: Boolean
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(LocalColors.Gray900.copy(alpha = 0.95f))
             .padding(16.dp)
-            .padding(bottom = 16.dp) // Extra padding for safe area
+            .padding(bottom = 16.dp)
     ) {
         Button(
             onClick = { onClick.invoke() },
@@ -326,17 +333,25 @@ fun BottomActionButton(
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Add $count Pupils to Group",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+            if (isButtonLoading) {
+                CircularProgressIndicator(
+                    color = LocalColors.Black,
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 4.dp
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Add $count Pupils to Group",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -371,6 +386,7 @@ fun PreviewAddPupilToGroupComposable() {
         onBackClick = {},
         onSelectAllClick = {},
         groupName = "Tabahi",
-        onStudentToggled = {}
+        onStudentToggled = {},
+        isButtonLoading = true
     )
 }
