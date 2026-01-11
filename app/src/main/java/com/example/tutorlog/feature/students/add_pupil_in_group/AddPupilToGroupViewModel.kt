@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tutorlog.domain.model.local.UIAdditionPupil
 import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.domain.usecase.RAddPupilToGroupUseCase
-import com.example.tutorlog.domain.usecase.RGetGroupDetailUseCase
-import com.example.tutorlog.domain.usecase.RGetStudentGroupUseCase
+import com.example.tutorlog.domain.usecase.RGetAddPupilToGroupUseCase
 import com.example.tutorlog.domain.usecase.base.Either
 import com.ramcosta.composedestinations.generated.navArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,9 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddPupilToGroupViewModel @Inject constructor(
-    private val getGroupDetailUseCase: RGetGroupDetailUseCase,
     private val savedStateHandle: SavedStateHandle,
-    private val getStudentGroupUseCase: RGetStudentGroupUseCase,
+    private val getAddPupilToGroupUseCase: RGetAddPupilToGroupUseCase,
     private val addPupilToGroupUseCase: RAddPupilToGroupUseCase
 ) : ContainerHost<AddPupilToGroupState, AddPupilToGroupSideEffect>, ViewModel() {
 
@@ -34,8 +32,7 @@ class AddPupilToGroupViewModel @Inject constructor(
     }
 
     fun getAllAddPupilToGroupData() {
-        getStudentData()
-        getAllPupil()
+        getAddPupilToGroupData()
     }
 
     fun filterOnlyNonAddedMembers(allPupilList: List<UIAdditionPupil>, addedPupilList: List<UIAdditionPupil>) {
@@ -59,7 +56,7 @@ class AddPupilToGroupViewModel @Inject constructor(
         }
     }
 
-    fun getAllPupil() {
+    fun getAddPupilToGroupData() {
         intent {
             reduce {
                 state.copy(
@@ -68,53 +65,8 @@ class AddPupilToGroupViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            getStudentGroupUseCase.process(
-                request = RGetStudentGroupUseCase.UCRequest
-            ).collect { result ->
-                when (result) {
-                    is Either.Success -> {
-                        intent {
-                            reduce {
-                                state.copy(
-                                    allPupilList = result.data.pupilList.map {
-                                        UIAdditionPupil(
-                                            id = it.id,
-                                            name = it.fullName,
-                                            details = it.email,
-                                            isSelected = false
-                                        )
-                                    }
-                                )
-                            }
-                        }
-
-                    }
-
-                    is Either.Error -> {
-                        intent {
-                            reduce {
-                                state.copy(
-                                    uiState = UIState.ERROR,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun getStudentData() {
-        intent {
-            reduce {
-                state.copy(
-                    uiState = UIState.LOADING
-                )
-            }
-        }
-        viewModelScope.launch {
-            getGroupDetailUseCase.process(
-                request = RGetGroupDetailUseCase.UCRequest(
+            getAddPupilToGroupUseCase.process(
+                request = RGetAddPupilToGroupUseCase.UCRequest(
                     groupId = savedStateHandle.navArgs<AddPupilToGroupNavArgs>().groupId
                 )
             ).collect { result ->
@@ -126,7 +78,15 @@ class AddPupilToGroupViewModel @Inject constructor(
                                     uiState = UIState.SUCCESS,
                                     groupName = result.data.groupName,
                                     groupDescription = result.data.groupDescription,
-                                    addedPupilList = result.data.pupilList.map {
+                                    addedPupilList = result.data.groupMemberList.map {
+                                        UIAdditionPupil(
+                                            id = it.id,
+                                            name = it.fullName,
+                                            details = it.email,
+                                            isSelected = false
+                                        )
+                                    },
+                                    allPupilList = result.data.allPupilList.map {
                                         UIAdditionPupil(
                                             id = it.id,
                                             name = it.fullName,
