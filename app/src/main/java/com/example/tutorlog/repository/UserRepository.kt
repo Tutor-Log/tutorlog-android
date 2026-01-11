@@ -28,8 +28,6 @@ class UserRepository @Inject constructor(
             val response = userService.getHealth()
             emit(response)
         } catch (e: Exception) {
-            println("karl : ${e.localizedMessage}")
-            println()
             e.printStackTrace().toString()
             emit(Response.error(500, okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")))
         }

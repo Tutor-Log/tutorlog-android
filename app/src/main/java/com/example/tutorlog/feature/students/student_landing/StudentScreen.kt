@@ -148,9 +148,9 @@ fun InitializeStudentScreen(
                     )
                     .clickable {
                         if (state.selectedIndex == 0) {
-                            viewModel.navigateToAddPupil()
-                        } else {
                             viewModel.navigateToAddGroup()
+                        } else {
+                            viewModel.navigateToAddPupil()
                         }
                     },
                 contentAlignment = Alignment.Center

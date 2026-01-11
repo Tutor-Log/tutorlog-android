@@ -8,7 +8,5 @@ data class AddPupilToGroupState(
     val groupName: String = "",
     val groupDescription: String = "",
     val pupilList: List<UIAdditionPupil> = emptyList(),
-    val allPupilList: List<UIAdditionPupil> = emptyList(),
-    val addedPupilList: List<UIAdditionPupil> = emptyList(),
     val isButtonLoading: Boolean = false
 )

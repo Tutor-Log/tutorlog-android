@@ -2,6 +2,7 @@ package com.example.tutorlog.domain.usecase
 
 import com.example.tutorlog.domain.local_storage.LocalKey
 import com.example.tutorlog.domain.local_storage.PreferencesManager
+import com.example.tutorlog.domain.model.local.UIAdditionPupil
 import com.example.tutorlog.domain.model.local.UIPupilInfo
 import com.example.tutorlog.domain.model.remote.GetPupilResponse
 import com.example.tutorlog.domain.usecase.base.Either
@@ -32,18 +33,29 @@ class RGetAddPupilToGroupUseCase @Inject constructor(
 
         return combine(groupMemberResponse, groupInfoResponse, pupilResponse) { groupMember, groupInfo, pupil ->
             if (groupMember.isSuccessful && groupInfo.isSuccessful && pupil.isSuccessful) {
-                val groupMemberList = groupMember.body()?.mapNotNull { item ->
-                    item.pupil_details?.toUIPupilInfo()
-                } ?: emptyList()
+                // Get IDs of existing group members
+                val groupMemberIds = groupMember.body()?.mapNotNull { item ->
+                    item.pupil_details?.toUIPupilInfo()?.id
+                }?.toSet() ?: emptySet()
 
-                val allPupilList = pupil.body()?.map { it.toUIPupilInfo() } ?: emptyList()
+                // Filter all pupils to exclude those already in the group and map to UIAdditionPupil
+                val pupilList = pupil.body()?.map { it.toUIPupilInfo() }
+                    ?.filter { it.id !in groupMemberIds }
+                    ?.map {
+                        UIAdditionPupil(
+                            id = it.id,
+                            name = it.fullName,
+                            isSelected = false,
+                            details = it.email
+                        )
+                    }
+                    ?: emptyList()
 
                 Either.Success(
                     data = UCResponse(
                         groupName = groupInfo.body()?.name.orEmpty(),
                         groupDescription = groupInfo.body()?.description.orEmpty(),
-                        groupMemberList = groupMemberList,
-                        allPupilList = allPupilList
+                        pupilList = pupilList
                     )
                 )
             } else {
@@ -76,7 +88,6 @@ class RGetAddPupilToGroupUseCase @Inject constructor(
     data class UCResponse(
         val groupName: String,
         val groupDescription: String,
-        val groupMemberList: List<UIPupilInfo>,
-        val allPupilList: List<UIPupilInfo>
+        val pupilList: List<UIAdditionPupil>
     )
 }
