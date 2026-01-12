@@ -89,7 +89,7 @@ fun LoginScreen(
         UIState.SUCCESS -> {
             Scaffold(
                 modifier = modifier
-                    .background(color = LocalColors.Gray900)
+                    .background(color = LocalColors.BackgroundDefaultDark)
                     .windowInsetsPadding(WindowInsets.statusBars)
                     .windowInsetsPadding(WindowInsets.navigationBars)
                     .fillMaxSize()

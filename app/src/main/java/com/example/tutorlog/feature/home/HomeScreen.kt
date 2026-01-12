@@ -37,6 +37,7 @@ import com.example.tutorlog.feature.home.composables.PupilClassTimingComposable
 import com.example.tutorlog.feature.home.composables.TopInfoBarComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AddEventScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.StudentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
@@ -55,6 +56,10 @@ fun HomeScreen(
         when (it) {
             HomeScreenSideEffect.NavigateToStudentsScreen -> {
                 navigator.navigate(StudentScreenDestination)
+            }
+
+            HomeScreenSideEffect.NavigateToAddEventScreen -> {
+                navigator.navigate(AddEventScreenDestination)
             }
         }
     }
@@ -113,7 +118,7 @@ fun InitializeHomeScreen(
                         shape = RoundedCornerShape(16.dp)
                     )
                     .clickable {
-                        // todo
+                        viewModel.navigateToAddEvent()
                     },
                 contentAlignment = Alignment.Center
             ) {
