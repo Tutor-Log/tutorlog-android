@@ -28,12 +28,10 @@ class AddPupilToGroupViewModel @Inject constructor(
     )
 
     init {
-        getAllAddPupilToGroupData()
-    }
-
-    fun getAllAddPupilToGroupData() {
         getAddPupilToGroupData()
     }
+
+
 
     fun filterOnlyNonAddedMembers(allPupilList: List<UIAdditionPupil>, addedPupilList: List<UIAdditionPupil>) {
         intent {
@@ -78,22 +76,7 @@ class AddPupilToGroupViewModel @Inject constructor(
                                     uiState = UIState.SUCCESS,
                                     groupName = result.data.groupName,
                                     groupDescription = result.data.groupDescription,
-                                    addedPupilList = result.data.groupMemberList.map {
-                                        UIAdditionPupil(
-                                            id = it.id,
-                                            name = it.fullName,
-                                            details = it.email,
-                                            isSelected = false
-                                        )
-                                    },
-                                    allPupilList = result.data.allPupilList.map {
-                                        UIAdditionPupil(
-                                            id = it.id,
-                                            name = it.fullName,
-                                            details = it.email,
-                                            isSelected = false
-                                        )
-                                    }
+                                    pupilList = result.data.pupilList,
                                 )
                             }
                         }

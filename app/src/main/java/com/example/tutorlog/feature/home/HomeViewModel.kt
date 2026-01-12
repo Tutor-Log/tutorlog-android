@@ -91,4 +91,10 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun navigateToAddEvent() {
+        intent {
+            postSideEffect(HomeScreenSideEffect.NavigateToAddEventScreen)
+        }
+    }
 }

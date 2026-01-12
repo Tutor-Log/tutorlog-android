@@ -64,7 +64,7 @@ fun ViolinAppLoadingScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(LocalColors.Gray900)
+            .background(LocalColors.BackgroundDefaultDark)
     ) {
         Box(
             modifier = Modifier
