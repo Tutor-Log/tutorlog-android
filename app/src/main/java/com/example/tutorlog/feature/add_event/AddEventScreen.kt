@@ -3,6 +3,7 @@ package com.example.tutorlog.feature.add_event
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -39,7 +40,9 @@ private fun InitializeAddEventScreen(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier
             .background(color = LocalColors.BackgroundDefaultDark)
-            .windowInsetsPadding(WindowInsets.statusBars),
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .fillMaxSize(),
     ) { contentPadding ->
         AddEventScreenComposable(
             modifier = Modifier
