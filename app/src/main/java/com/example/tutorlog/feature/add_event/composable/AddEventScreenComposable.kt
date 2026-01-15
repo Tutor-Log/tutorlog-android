@@ -18,12 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -33,11 +37,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -48,25 +55,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.example.tutorlog.R
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.domain.model.local.UIAdditionGroup
+import com.example.tutorlog.domain.model.local.UIAdditionPupil
+import com.example.tutorlog.feature.add_event.AddEventState
+import com.example.tutorlog.utils.getInitials
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEventScreenComposable(
+    state: AddEventState,
     onBackClick: () -> Unit = {},
     onSubmit: () -> Unit = {},
+    onPupilToggled: (Int) -> Unit = {},
+    onGroupToggled: (Int) -> Unit = {},
+    onSelectAllPupils: () -> Unit = {},
+    onSelectAllGroups: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    var showPupilModal by remember { mutableStateOf(false) }
+    var showPupilBottomSheet by remember { mutableStateOf(false) }
+    var showGroupBottomSheet by remember { mutableStateOf(false) }
     var frequency by remember { mutableStateOf("Repeat") } // "One-time" or "Repeat"
 
     // Form States
@@ -144,13 +160,13 @@ fun AddEventScreenComposable(
                 ParticipantButton(
                     icon = R.drawable.ic_person,
                     label = "Add Pupil",
-                    onClick = { showPupilModal = true },
+                    onClick = { showPupilBottomSheet = true },
                     modifier = Modifier.weight(1f)
                 )
                 ParticipantButton(
                     icon = R.drawable.ic_group,
                     label = "Add Group",
-                    onClick = { /* TODO */ },
+                    onClick = { showGroupBottomSheet = true },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -316,8 +332,24 @@ fun AddEventScreenComposable(
         Spacer(modifier = Modifier.height(32.dp))
     }
 
-    if (showPupilModal) {
-        PupilSelectionModal(onDismiss = { showPupilModal = false })
+    // Pupil Selection Bottom Sheet
+    if (showPupilBottomSheet) {
+        PupilSelectionBottomSheet(
+            pupils = state.selectablePupilList,
+            onDismiss = { showPupilBottomSheet = false },
+            onPupilToggled = onPupilToggled,
+            onSelectAll = onSelectAllPupils
+        )
+    }
+
+    // Group Selection Bottom Sheet
+    if (showGroupBottomSheet) {
+        GroupSelectionBottomSheet(
+            groups = state.selectableGroupList,
+            onDismiss = { showGroupBottomSheet = false },
+            onGroupToggled = onGroupToggled,
+            onSelectAll = onSelectAllGroups
+        )
     }
 }
 
@@ -498,35 +530,61 @@ fun DayCircle(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PupilSelectionModal(onDismiss: () -> Unit) {
-    Dialog(
+fun PupilSelectionBottomSheet(
+    pupils: List<UIAdditionPupil>,
+    onDismiss: () -> Unit,
+    onPupilToggled: (Int) -> Unit,
+    onSelectAll: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var searchQuery by remember { mutableStateOf("") }
+    
+    val filteredPupils = remember(searchQuery, pupils) {
+        if (searchQuery.isEmpty()) pupils
+        else pupils.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    }
+    
+    val selectedCount = pupils.count { it.isSelected }
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        sheetState = sheetState,
+        containerColor = LocalColors.Gray800,
+        dragHandle = null
     ) {
-        Surface(
+        Column(
             modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .wrapContentHeight(),
-            shape = RoundedCornerShape(16.dp),
-            color = LocalColors.Gray800,
-            border = BorderStroke(1.dp, LocalColors.Gray700)
+                .fillMaxWidth()
+                .wrapContentHeight()
         ) {
-            Column {
-                // Header
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Select Pupils",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .border(0.dp, Color.Transparent, RoundedCornerShape(0.dp)),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        "Select Pupil",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        text = "Select All",
+                        color = LocalColors.PrimaryGreen,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .clickable(onClick = onSelectAll)
+                            .padding(8.dp)
                     )
                     IconButton(onClick = onDismiss) {
                         Icon(
@@ -536,72 +594,57 @@ fun PupilSelectionModal(onDismiss: () -> Unit) {
                         )
                     }
                 }
-                HorizontalDivider(color = LocalColors.Gray700)
+            }
+            HorizontalDivider(color = LocalColors.Gray700)
 
-                // Content
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // Search
-                    TextField(
-                        value = "",
-                        onValueChange = {},
-                        placeholder = {
-                            Text(
-                                "Search pupils...",
-                                color = Color.Gray,
-                                fontSize = 14.sp
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = null,
-                                tint = Color.Gray
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp)),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = LocalColors.Gray900,
-                            unfocusedContainerColor = LocalColors.Gray900,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        )
+            // Search Bar
+            BottomSheetSearchBar(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = "Search pupils..."
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Pupil List
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .padding(horizontal = 16.dp)
+            ) {
+                itemsIndexed(filteredPupils) { index, pupil ->
+                    SelectablePupilItem(
+                        pupil = pupil,
+                        onClick = { onPupilToggled(pupil.id) },
+                        showDivider = index != filteredPupils.lastIndex
                     )
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // List Item
-                    Row(
+            // Bottom Action
+            if (selectedCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(LocalColors.Gray900)
+                        .padding(16.dp)
+                ) {
+                    Button(
+                        onClick = onDismiss,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onDismiss() }
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = LocalColors.PrimaryGreen,
+                            contentColor = LocalColors.Gray900
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF3B82F6).copy(alpha = 0.1f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("JD", color = Color(0xFF60A5FA), fontWeight = FontWeight.Bold)
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 12.dp)
-                                .weight(1f)
-                        ) {
-                            Text("Jane Doe", color = Color.White, fontWeight = FontWeight.Medium)
-                            Text("Advanced Violin", color = LocalColors.Gray400, fontSize = 12.sp)
-                        }
-
-                        Icon(
-                            painter = painterResource(android.R.drawable.radiobutton_off_background), // Fallback or use icon
-                            contentDescription = null,
-                            tint = LocalColors.Gray400
+                        Text(
+                            text = "Done ($selectedCount selected)",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -610,11 +653,346 @@ fun PupilSelectionModal(onDismiss: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GroupSelectionBottomSheet(
+    groups: List<UIAdditionGroup>,
+    onDismiss: () -> Unit,
+    onGroupToggled: (Int) -> Unit,
+    onSelectAll: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var searchQuery by remember { mutableStateOf("") }
+    
+    val filteredGroups = remember(searchQuery, groups) {
+        if (searchQuery.isEmpty()) groups
+        else groups.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    }
+    
+    val selectedCount = groups.count { it.isSelected }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = LocalColors.Gray800,
+        dragHandle = null
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Select Groups",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Select All",
+                        color = LocalColors.PrimaryGreen,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .clickable(onClick = onSelectAll)
+                            .padding(8.dp)
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = LocalColors.Gray400
+                        )
+                    }
+                }
+            }
+            HorizontalDivider(color = LocalColors.Gray700)
+
+            // Search Bar
+            BottomSheetSearchBar(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = "Search groups..."
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Group List
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .padding(horizontal = 16.dp)
+            ) {
+                itemsIndexed(filteredGroups) { index, group ->
+                    SelectableGroupItem(
+                        group = group,
+                        onClick = { onGroupToggled(group.id) },
+                        showDivider = index != filteredGroups.lastIndex
+                    )
+                }
+            }
+
+            // Bottom Action
+            if (selectedCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(LocalColors.Gray900)
+                        .padding(16.dp)
+                ) {
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = LocalColors.PrimaryGreen,
+                            contentColor = LocalColors.Gray900
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "Done ($selectedCount selected)",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BottomSheetSearchBar(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 16.sp),
+        cursorBrush = SolidColor(LocalColors.PrimaryGreen),
+        decorationBox = { innerTextField ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .background(LocalColors.Gray900, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Box(contentAlignment = Alignment.CenterStart) {
+                    if (value.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
+                    innerTextField()
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun SelectablePupilItem(
+    pupil: UIAdditionPupil,
+    onClick: () -> Unit,
+    showDivider: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+            // Avatar
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(LocalColors.Blue300),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = pupil.name.getInitials(),
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Text Info
+            Column {
+                Text(
+                    text = pupil.name,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+                if (pupil.details.isNotEmpty()) {
+                    Text(
+                        text = pupil.details,
+                        color = LocalColors.Gray400,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+            }
+        }
+
+        // Custom Checkbox
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(if (pupil.isSelected) LocalColors.PrimaryGreen else Color.Transparent)
+                .border(
+                    width = 2.dp,
+                    color = if (pupil.isSelected) LocalColors.PrimaryGreen else Color(0xFF4B5563),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (pupil.isSelected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = LocalColors.Gray900,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+
+    if (showDivider) {
+        HorizontalDivider(
+            color = LocalColors.DividerColor,
+            thickness = 1.dp
+        )
+    }
+}
+
+@Composable
+fun SelectableGroupItem(
+    group: UIAdditionGroup,
+    onClick: () -> Unit,
+    showDivider: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+            // Group Icon
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(LocalColors.Purple300),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_group),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Text Info
+            Column {
+                Text(
+                    text = group.name,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+                if (group.description.isNotEmpty()) {
+                    Text(
+                        text = group.description,
+                        color = LocalColors.Gray400,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+            }
+        }
+
+        // Custom Checkbox
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(if (group.isSelected) LocalColors.PrimaryGreen else Color.Transparent)
+                .border(
+                    width = 2.dp,
+                    color = if (group.isSelected) LocalColors.PrimaryGreen else Color(0xFF4B5563),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (group.isSelected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = LocalColors.Gray900,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+
+    if (showDivider) {
+        HorizontalDivider(
+            color = LocalColors.DividerColor,
+            thickness = 1.dp
+        )
+    }
+}
+
 
 @Preview
 @Composable
 private fun PreviewAddEventScreen() {
     AddEventScreenComposable(
+        state = AddEventState(),
         modifier = Modifier
             .fillMaxSize()
             .background(LocalColors.BackgroundDefaultDark)
