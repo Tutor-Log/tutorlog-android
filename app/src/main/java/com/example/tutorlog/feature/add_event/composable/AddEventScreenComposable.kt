@@ -65,14 +65,14 @@ import com.example.tutorlog.R
 import com.example.tutorlog.design.LocalColors
 import com.example.tutorlog.domain.model.local.UIAdditionGroup
 import com.example.tutorlog.domain.model.local.UIAdditionPupil
-import com.example.tutorlog.feature.add_event.AddEventState
 import com.example.tutorlog.utils.getInitials
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEventScreenComposable(
-    state: AddEventState,
+    selectablePupilList: List<UIAdditionPupil>,
+    selectableGroupList: List<UIAdditionGroup>,
     onBackClick: () -> Unit = {},
     onSubmit: () -> Unit = {},
     onPupilToggled: (Int) -> Unit = {},
@@ -335,7 +335,7 @@ fun AddEventScreenComposable(
     // Pupil Selection Bottom Sheet
     if (showPupilBottomSheet) {
         PupilSelectionBottomSheet(
-            pupils = state.selectablePupilList,
+            pupils = selectablePupilList,
             onDismiss = { showPupilBottomSheet = false },
             onPupilToggled = onPupilToggled,
             onSelectAll = onSelectAllPupils
@@ -345,7 +345,7 @@ fun AddEventScreenComposable(
     // Group Selection Bottom Sheet
     if (showGroupBottomSheet) {
         GroupSelectionBottomSheet(
-            groups = state.selectableGroupList,
+            groups = selectableGroupList,
             onDismiss = { showGroupBottomSheet = false },
             onGroupToggled = onGroupToggled,
             onSelectAll = onSelectAllGroups
@@ -992,7 +992,8 @@ fun SelectableGroupItem(
 @Composable
 private fun PreviewAddEventScreen() {
     AddEventScreenComposable(
-        state = AddEventState(),
+        selectablePupilList = emptyList(),
+        selectableGroupList = emptyList(),
         modifier = Modifier
             .fillMaxSize()
             .background(LocalColors.BackgroundDefaultDark)

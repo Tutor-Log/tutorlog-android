@@ -12,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.domain.model.local.UIAdditionGroup
+import com.example.tutorlog.domain.model.local.UIAdditionPupil
 import com.example.tutorlog.feature.add_event.composable.AddEventScreenComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -34,7 +36,8 @@ fun AddEventScreen(
         }
     }
     InitializeAddEventScreen(
-        state = state,
+        selectablePupilList = state.selectablePupilList,
+        selectableGroupList = state.selectableGroupList,
         onBackClick = { navigator.popBackStack() },
         onPupilToggled = { viewModel.togglePupilSelection(it) },
         onGroupToggled = { viewModel.toggleGroupSelection(it) },
@@ -46,7 +49,8 @@ fun AddEventScreen(
 
 @Composable
 private fun InitializeAddEventScreen(
-    state: AddEventState,
+    selectablePupilList: List<UIAdditionPupil>,
+    selectableGroupList: List<UIAdditionGroup>,
     onBackClick: () -> Unit,
     onPupilToggled: (Int) -> Unit,
     onGroupToggled: (Int) -> Unit,
@@ -60,7 +64,8 @@ private fun InitializeAddEventScreen(
             .windowInsetsPadding(WindowInsets.statusBars),
     ) { contentPadding ->
         AddEventScreenComposable(
-            state = state,
+            selectablePupilList = selectablePupilList,
+            selectableGroupList = selectableGroupList,
             onBackClick = onBackClick,
             onPupilToggled = onPupilToggled,
             onGroupToggled = onGroupToggled,
