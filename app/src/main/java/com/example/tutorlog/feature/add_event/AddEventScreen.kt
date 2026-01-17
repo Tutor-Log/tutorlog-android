@@ -138,7 +138,14 @@ private fun InitializeAddEventScreen(
                     day = it
                 )
             },
-            repeatUntil = state.repeatUntil
+            repeatUntil = state.repeatUntil,
+            // Pass validation error states from ViewModel
+            showTitleError = state.showTitleError,
+            showStartTimeError = state.showStartTimeError,
+            showEndTimeError = state.showEndTimeError,
+            showRepeatDaysError = state.showRepeatDaysError,
+            showRepeatUntilError = state.showRepeatUntilError,
+            validationTrigger = state.validationTrigger
         )
     }
 }

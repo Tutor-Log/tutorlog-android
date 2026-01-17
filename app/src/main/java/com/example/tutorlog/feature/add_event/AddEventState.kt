@@ -15,5 +15,12 @@ data class AddEventState(
     val frequency: EventFrequencyType = EventFrequencyType.ONE_TIME,
     val repeatDays: List<Int> = emptyList(),
     val repeatUntil: String = "",
-    val selectedDays: List<Int> = emptyList()
+    val selectedDays: List<Int> = emptyList(),
+    // Validation error states
+    val showTitleError: Boolean = false,
+    val showStartTimeError: Boolean = false,
+    val showEndTimeError: Boolean = false,
+    val showRepeatDaysError: Boolean = false,
+    val showRepeatUntilError: Boolean = false,
+    val validationTrigger: Int = 0
 )

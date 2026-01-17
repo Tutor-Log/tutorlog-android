@@ -93,7 +93,12 @@ class AddEventViewModel @Inject constructor(
 
     fun onEventNameEntered(eventName: String) {
         intent {
-            reduce { state.copy(eventName = eventName) }
+            reduce { 
+                state.copy(
+                    eventName = eventName,
+                    showTitleError = if (eventName.isNotEmpty()) false else state.showTitleError
+                ) 
+            }
         }
     }
 
@@ -117,7 +122,8 @@ class AddEventViewModel @Inject constructor(
         intent {
             reduce {
                 state.copy(
-                    startTime = time
+                    startTime = time,
+                    showStartTimeError = false
                 )
             }
         }
@@ -127,7 +133,8 @@ class AddEventViewModel @Inject constructor(
         intent {
             reduce {
                 state.copy(
-                    endTime = time
+                    endTime = time,
+                    showEndTimeError = false
                 )
             }
         }
@@ -153,7 +160,8 @@ class AddEventViewModel @Inject constructor(
         intent {
             reduce {
                 state.copy(
-                    selectedDays = updatedList
+                    selectedDays = updatedList,
+                    showRepeatDaysError = false
                 )
             }
         }
@@ -163,7 +171,8 @@ class AddEventViewModel @Inject constructor(
         intent {
             reduce {
                 state.copy(
-                    repeatUntil = date.convertToDdMmmYy()
+                    repeatUntil = date.convertToDdMmmYy(),
+                    showRepeatUntilError = false
                 )
             }
         }
@@ -180,19 +189,77 @@ class AddEventViewModel @Inject constructor(
         repeatDays: List<Int>,
         selectedPupils: List<UIAdditionPupil>
     ) {
-        // repeat_pattern -> weekly always
-        println("karl title: $title")
-        println("karl description: $description")
-        println("karl eventType: ${if (eventType == EventFrequencyType.ONE_TIME) "once" else "REPEAT" }")
-        println("karl date: ${convertToIsoDate(date)}")
-        println("karl startTime: $startTime")
-        println("karl endTime: $endTime")
-        println("karl repeatUntil: ${convertToIsoDate(repeatUntil)}")
-        println("karl repeatDays: $repeatDays")
-        println("karl selectedPupils: $selectedPupils")
+        intent {
+            // Reset all errors first
+            var titleError = false
+            var startTimeError = false
+            var endTimeError = false
+            var repeatDaysError = false
+            var repeatUntilError = false
+            var hasError = false
 
+            // Validate mandatory fields: title, startTime, endTime
+            if (title.isBlank()) {
+                titleError = true
+                hasError = true
+            }
+            if (startTime.isBlank()) {
+                startTimeError = true
+                hasError = true
+            }
+            if (endTime.isBlank()) {
+                endTimeError = true
+                hasError = true
+            }
 
+            // Additional mandatory fields for repeat frequency
+            if (eventType == EventFrequencyType.REPEAT) {
+                if (repeatDays.isEmpty()) {
+                    repeatDaysError = true
+                    hasError = true
+                }
+                if (repeatUntil.isBlank()) {
+                    repeatUntilError = true
+                    hasError = true
+                }
+            }
 
+            if (hasError) {
+                // Update state with errors and increment trigger for shake animation
+                reduce {
+                    state.copy(
+                        showTitleError = titleError,
+                        showStartTimeError = startTimeError,
+                        showEndTimeError = endTimeError,
+                        showRepeatDaysError = repeatDaysError,
+                        showRepeatUntilError = repeatUntilError,
+                        validationTrigger = state.validationTrigger + 1
+                    )
+                }
+            } else {
+                // Clear all errors
+                reduce {
+                    state.copy(
+                        showTitleError = false,
+                        showStartTimeError = false,
+                        showEndTimeError = false,
+                        showRepeatDaysError = false,
+                        showRepeatUntilError = false
+                    )
+                }
+                // All mandatory fields are filled, proceed with submit
+                // repeat_pattern -> weekly always
+                println("karl title: $title")
+                println("karl description: $description")
+                println("karl eventType: ${if (eventType == EventFrequencyType.ONE_TIME) "once" else "REPEAT" }")
+                println("karl date: ${convertToIsoDate(date)}")
+                println("karl startTime: $startTime")
+                println("karl endTime: $endTime")
+                println("karl repeatUntil: ${convertToIsoDate(repeatUntil)}")
+                println("karl repeatDays: $repeatDays")
+                println("karl selectedPupils: $selectedPupils")
+            }
+        }
     }
 
     fun convertToIsoDate(dateString: String): String {

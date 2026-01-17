@@ -43,7 +43,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -85,6 +84,13 @@ fun AddEventScreenComposable(
     onSubmit: () -> Unit = {},
     onPupilToggled: (Int) -> Unit = {},
     onSelectAllPupils: () -> Unit = {},
+    // Validation error states from ViewModel
+    showTitleError: Boolean = false,
+    showStartTimeError: Boolean = false,
+    showEndTimeError: Boolean = false,
+    showRepeatDaysError: Boolean = false,
+    showRepeatUntilError: Boolean = false,
+    validationTrigger: Int = 0,
     modifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(DatePickerMode.NONE) }
@@ -104,18 +110,6 @@ fun AddEventScreenComposable(
         is24Hour = true
     )
     var showPupilBottomSheet by remember { mutableStateOf(false) }
-
-    // Validation error states
-    var titleError by remember { mutableStateOf(false) }
-    var startTimeError by remember { mutableStateOf(false) }
-    var endTimeError by remember { mutableStateOf(false) }
-    var repeatDaysError by remember { mutableStateOf(false) }
-    var repeatUntilError by remember { mutableStateOf(false) }
-
-    // Increment this to trigger shake animation
-    var validationTrigger by remember { mutableIntStateOf(0) }
-
-    // Repeat Logic
 
     Column(
         modifier = modifier
@@ -157,10 +151,9 @@ fun AddEventScreenComposable(
             value = eventName,
             onValueChange = { 
                 onEventNameEntered.invoke(it)
-                if (it.isNotEmpty()) titleError = false
             },
             placeholder = "e.g. Masterclass with Jane",
-            isError = titleError,
+            isError = showTitleError,
             shakeTrigger = validationTrigger
         )
 
@@ -209,7 +202,7 @@ fun AddEventScreenComposable(
                         activeTimePickerMode = TimePickerMode.START
                     },
                     icon = R.drawable.ic_start_time,
-                    isError = startTimeError,
+                    isError = showStartTimeError,
                     shakeTrigger = validationTrigger
                 )
             }
@@ -221,7 +214,7 @@ fun AddEventScreenComposable(
                         activeTimePickerMode = TimePickerMode.END
                     },
                     icon = R.drawable.ic_end_time,
-                    isError = endTimeError,
+                    isError = showEndTimeError,
                     shakeTrigger = validationTrigger
                 )
             }
@@ -300,10 +293,8 @@ fun AddEventScreenComposable(
                         selectedList = selectedDayList,
                         onClick = {
                             onSelectedDayClick.invoke(it)
-                            // Clear error after a day is clicked (list will be updated by the callback)
-                            repeatDaysError = false
                         },
-                        isError = repeatDaysError,
+                        isError = showRepeatDaysError,
                         shakeTrigger = validationTrigger
                     )
 
@@ -311,7 +302,7 @@ fun AddEventScreenComposable(
                         onClick = { showDatePicker = DatePickerMode.REPEAT_UNTIL },
                         label = "Repeat Until",
                         date = repeatUntil,
-                        isError = repeatUntilError,
+                        isError = showRepeatUntilError,
                         shakeTrigger = validationTrigger
                     )
                 }
@@ -320,51 +311,7 @@ fun AddEventScreenComposable(
 
         // Submit Button
         Button(
-            onClick = {
-                // Reset all errors
-                titleError = false
-                startTimeError = false
-                endTimeError = false
-                repeatDaysError = false
-                repeatUntilError = false
-
-                // Validate mandatory fields
-                var hasError = false
-
-                // Always mandatory: title, startTime, endTime
-                if (eventName.isBlank()) {
-                    titleError = true
-                    hasError = true
-                }
-                if (startTime.isBlank()) {
-                    startTimeError = true
-                    hasError = true
-                }
-                if (endTime.isBlank()) {
-                    endTimeError = true
-                    hasError = true
-                }
-
-                // Additional mandatory fields for repeat frequency
-                if (frequency == EventFrequencyType.REPEAT) {
-                    if (selectedDayList.isEmpty()) {
-                        repeatDaysError = true
-                        hasError = true
-                    }
-                    if (repeatUntil.isBlank()) {
-                        repeatUntilError = true
-                        hasError = true
-                    }
-                }
-
-                // Trigger shake animation by incrementing the counter
-                if (hasError) {
-                    validationTrigger++
-                } else {
-                    // All mandatory fields are filled, proceed with submit
-                    onSubmit()
-                }
-            },
+            onClick = onSubmit,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -393,7 +340,6 @@ fun AddEventScreenComposable(
                             onDateClicked.invoke(Pair(0, datePickerState.selectedDateMillis ?: 0L))
                         } else {
                             onDateClicked.invoke(Pair(1, datePickerState.selectedDateMillis ?: 0L))
-                            if (datePickerState.selectedDateMillis != null) repeatUntilError = false
                         }
                         showDatePicker = DatePickerMode.NONE
                     }
@@ -417,12 +363,10 @@ fun AddEventScreenComposable(
             onConfirm = {
                 onTimeClicked.invoke(
                     if (activeTimePickerMode == TimePickerMode.START) {
-                        startTimeError = false
                         Pair(
                             0, "${timePickerState.hour}-${timePickerState.minute}"
                         )
                     } else {
-                        endTimeError = false
                         Pair(
                             1, "${timePickerState.hour}-${timePickerState.minute}"
                         )
