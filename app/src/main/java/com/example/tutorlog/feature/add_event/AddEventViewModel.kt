@@ -3,23 +3,29 @@ package com.example.tutorlog.feature.add_event
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tutorlog.domain.model.local.UIAdditionPupil
+import com.example.tutorlog.domain.types.EventFrequencyType
 import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.domain.usecase.RGetStudentGroupUseCase
 import com.example.tutorlog.domain.usecase.base.Either
+import com.example.tutorlog.utils.convertToDdMmmYy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 
 @HiltViewModel
 class AddEventViewModel @Inject constructor(
     private val getStudentGroupUseCase: RGetStudentGroupUseCase
-): ContainerHost<AddEventState, AddEventSideEffect> , ViewModel(){
+) : ContainerHost<AddEventState, AddEventSideEffect>, ViewModel() {
 
-    override val container: Container<AddEventState, AddEventSideEffect> = container(initialState = AddEventState())
+    override val container: Container<AddEventState, AddEventSideEffect> =
+        container(initialState = AddEventState())
 
     init {
         getAddEventPupilList()
@@ -41,8 +47,7 @@ class AddEventViewModel @Inject constructor(
                             reduce {
                                 state.copy(
                                     uiState = UIState.SUCCESS,
-                                    pupilList = result.data.pupilList,
-                                    selectablePupilList = result.data.pupilList.map { pupil ->
+                                    pupilList = result.data.pupilList.map { pupil ->
                                         UIAdditionPupil(
                                             id = pupil.id,
                                             name = pupil.fullName,
@@ -54,6 +59,7 @@ class AddEventViewModel @Inject constructor(
                             }
                         }
                     }
+
                     is Either.Error -> {
                         intent {
                             reduce {
@@ -67,21 +73,141 @@ class AddEventViewModel @Inject constructor(
     }
 
     fun togglePupilSelection(pupilId: Int) = intent {
-        val updatedList = state.selectablePupilList.map { pupil ->
+        val updatedList = state.pupilList.map { pupil ->
             if (pupil.id == pupilId) {
                 pupil.copy(isSelected = !pupil.isSelected)
             } else {
                 pupil
             }
         }
-        reduce { state.copy(selectablePupilList = updatedList) }
+        reduce { state.copy(pupilList = updatedList) }
     }
 
     fun selectAllPupils() = intent {
-        val allSelected = state.selectablePupilList.all { it.isSelected }
-        val updatedList = state.selectablePupilList.map { pupil ->
+        val allSelected = state.pupilList.all { it.isSelected }
+        val updatedList = state.pupilList.map { pupil ->
             pupil.copy(isSelected = !allSelected)
         }
-        reduce { state.copy(selectablePupilList = updatedList) }
+        reduce { state.copy(pupilList = updatedList) }
     }
+
+    fun onEventNameEntered(eventName: String) {
+        intent {
+            reduce { state.copy(eventName = eventName) }
+        }
+    }
+
+    fun onDescriptionEntered(description: String) {
+        intent {
+            reduce { state.copy(eventDescription = description) }
+        }
+    }
+
+    fun onStartDateClick(date: Long) {
+        intent {
+            reduce {
+                state.copy(
+                    date = date.convertToDdMmmYy()
+                )
+            }
+        }
+    }
+
+    fun updateStartTime(time: String) {
+        intent {
+            reduce {
+                state.copy(
+                    startTime = time
+                )
+            }
+        }
+    }
+
+    fun updateEndTime(time: String) {
+        intent {
+            reduce {
+                state.copy(
+                    endTime = time
+                )
+            }
+        }
+    }
+
+    fun updateFrequency(frequency: EventFrequencyType) {
+        intent {
+            reduce {
+                state.copy(
+                    frequency = if (frequency == EventFrequencyType.ONE_TIME) EventFrequencyType.REPEAT else EventFrequencyType.ONE_TIME
+                )
+            }
+        }
+    }
+
+    fun updateSelectedDays(selectedList: List<Int>,day: Int) {
+        val updatedList = selectedList.toMutableList()
+        if (day !in selectedList) {
+            updatedList.add(day)
+        } else {
+            updatedList.remove(day)
+        }
+        intent {
+            reduce {
+                state.copy(
+                    selectedDays = updatedList
+                )
+            }
+        }
+    }
+
+    fun updateRepeatUntil(date: Long) {
+        intent {
+            reduce {
+                state.copy(
+                    repeatUntil = date.convertToDdMmmYy()
+                )
+            }
+        }
+    }
+
+    fun onSubmit(
+        title: String,
+        description: String,
+        eventType: EventFrequencyType,
+        date: String,
+        startTime: String,
+        endTime: String,
+        repeatUntil: String,
+        repeatDays: List<Int>,
+        selectedPupils: List<UIAdditionPupil>
+    ) {
+        // repeat_pattern -> weekly always
+        println("karl title: $title")
+        println("karl description: $description")
+        println("karl eventType: ${if (eventType == EventFrequencyType.ONE_TIME) "once" else "REPEAT" }")
+        println("karl date: ${convertToIsoDate(date)}")
+        println("karl startTime: $startTime")
+        println("karl endTime: $endTime")
+        println("karl repeatUntil: ${convertToIsoDate(repeatUntil)}")
+        println("karl repeatDays: $repeatDays")
+        println("karl selectedPupils: $selectedPupils")
+
+
+
+    }
+
+    fun convertToIsoDate(dateString: String): String {
+        try {
+            val inputFormat = SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH)
+
+            val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+
+            val date = inputFormat.parse(dateString)
+            return outputFormat.format(date ?: Date())
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return ""
+        }
+    }
+
 }

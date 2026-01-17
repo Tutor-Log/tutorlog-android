@@ -15,7 +15,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.LocalColors
 import com.example.tutorlog.design.TFullScreenErrorComposable
 import com.example.tutorlog.design.TFullScreenLoaderComposable
-import com.example.tutorlog.domain.model.local.UIAdditionPupil
 import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.add_event.composable.AddEventScreenComposable
 import com.ramcosta.composedestinations.annotation.Destination
@@ -42,10 +41,9 @@ fun AddEventScreen(
     when (state.uiState) {
         UIState.SUCCESS -> {
             InitializeAddEventScreen(
-                selectablePupilList = state.selectablePupilList,
-                onBackClick = { navigator.popBackStack() },
-                onPupilToggled = { viewModel.togglePupilSelection(it) },
-                onSelectAllPupils = { viewModel.selectAllPupils() },
+                navigator = navigator,
+                state = state,
+                viewModel = viewModel
             )
         }
 
@@ -65,10 +63,9 @@ fun AddEventScreen(
 
 @Composable
 private fun InitializeAddEventScreen(
-    selectablePupilList: List<UIAdditionPupil>,
-    onBackClick: () -> Unit,
-    onPupilToggled: (Int) -> Unit,
-    onSelectAllPupils: () -> Unit,
+    state: AddEventState,
+    navigator: DestinationsNavigator,
+    viewModel: AddEventViewModel,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -78,14 +75,70 @@ private fun InitializeAddEventScreen(
             .windowInsetsPadding(WindowInsets.navigationBars),
     ) { contentPadding ->
         AddEventScreenComposable(
-            selectablePupilList = selectablePupilList,
-            onBackClick = onBackClick,
-            onPupilToggled = onPupilToggled,
-            onSelectAllPupils = onSelectAllPupils,
             modifier = Modifier
                 .padding(contentPadding)
                 .background(LocalColors.BackgroundDefaultDark)
-                .fillMaxSize()
+                .fillMaxSize(),
+            selectablePupilList = state.pupilList,
+            onBackClick = {
+                navigator.popBackStack()
+            },
+            onPupilToggled = {
+                viewModel.togglePupilSelection(it)
+            },
+            onSelectAllPupils = {
+                viewModel.selectAllPupils()
+            },
+            eventName = state.eventName,
+            onEventNameEntered = {
+                viewModel.onEventNameEntered(it)
+            },
+            description = state.eventDescription,
+            onDescriptionEntered = {
+                viewModel.onDescriptionEntered(it)
+            },
+            date = state.date,
+            startTime = state.startTime,
+            endTime = state.endTime,
+            frequency = state.frequency,
+            onDateClicked = {
+                if (it.first == 0) {
+                    viewModel.onStartDateClick(it.second)
+                } else {
+                    viewModel.updateRepeatUntil(it.second)
+                }
+            },
+            onTimeClicked = {
+                if (it.first == 0) {
+                    viewModel.updateStartTime(it.second)
+                } else {
+                    viewModel.updateEndTime(it.second)
+                }
+            },
+            onFrequencyClicked = {
+                viewModel.updateFrequency(it)
+            },
+            onSubmit = {
+                viewModel.onSubmit(
+                    title = state.eventName,
+                    description = state.eventDescription,
+                    eventType = state.frequency,
+                    date = state.date,
+                    startTime = state.startTime,
+                    endTime = state.endTime,
+                    repeatUntil = state.repeatUntil,
+                    repeatDays = state.selectedDays,
+                    selectedPupils = state.pupilList.filter { it.isSelected == true }
+                )
+            },
+            selectedDayList = state.selectedDays,
+            onSelectedDayClick = {
+                viewModel.updateSelectedDays(
+                    selectedList = state.selectedDays,
+                    day = it
+                )
+            },
+            repeatUntil = state.repeatUntil
         )
     }
 }
