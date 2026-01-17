@@ -25,15 +25,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.utils.shake
 
 @Composable
 fun TappableIconComposable(
     label: String,
     value: String,
     onClick: () -> Unit,
-    @DrawableRes icon: Int
+    @DrawableRes icon: Int,
+    isError: Boolean = false,
+    shakeTrigger: Int = 0
 ) {
-    Column {
+    Column(modifier = Modifier.shake(trigger = shakeTrigger, enabled = isError)) {
         Text(
             text = label,
             color = LocalColors.Gray400,
@@ -47,7 +50,7 @@ fun TappableIconComposable(
                 .background(LocalColors.Gray800, shape = RoundedCornerShape(12.dp))
                 .border(
                     width = 1.dp,
-                    color = LocalColors.Gray700,
+                    color = if (isError) LocalColors.Red500 else LocalColors.Gray700,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(vertical = 16.dp, horizontal = 12.dp)

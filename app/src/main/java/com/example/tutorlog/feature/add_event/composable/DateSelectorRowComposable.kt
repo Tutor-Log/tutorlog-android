@@ -25,14 +25,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tutorlog.R
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.utils.shake
 
 @Composable
 fun DateSelectorRowComposable(
     label: String,
     onClick: () -> Unit,
     date: String,
+    isError: Boolean = false,
+    shakeTrigger: Int = 0,
     modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.shake(trigger = shakeTrigger, enabled = isError)) {
         Text(
             text = label,
             color = LocalColors.Gray400,
@@ -46,7 +49,7 @@ fun DateSelectorRowComposable(
                 .background(LocalColors.Gray800, shape = RoundedCornerShape(12.dp))
                 .border(
                     width = 1.dp,
-                    color = LocalColors.Gray700,
+                    color = if (isError) LocalColors.Red500 else LocalColors.Gray700,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(vertical = 16.dp, horizontal = 12.dp)

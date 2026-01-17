@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.utils.shake
 
 @Composable
 fun AddEventTextField(
@@ -26,9 +27,11 @@ fun AddEventTextField(
     placeholder: String = "",
     singleLine: Boolean = true,
     height: androidx.compose.ui.unit.Dp? = null,
+    isError: Boolean = false,
+    shakeTrigger: Int = 0,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.shake(trigger = shakeTrigger, enabled = isError)) {
         Text(
             label,
             color = LocalColors.Gray400,
@@ -42,7 +45,11 @@ fun AddEventTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .then(if (height != null) Modifier.height(height) else Modifier)
-                .border(1.dp, LocalColors.Gray700, RoundedCornerShape(12.dp))
+                .border(
+                    1.dp,
+                    if (isError) LocalColors.Red500 else LocalColors.Gray700,
+                    RoundedCornerShape(12.dp)
+                )
                 .clip(RoundedCornerShape(12.dp)),
             placeholder = { Text(placeholder, color = Color.Gray) },
             colors = TextFieldDefaults.colors(
