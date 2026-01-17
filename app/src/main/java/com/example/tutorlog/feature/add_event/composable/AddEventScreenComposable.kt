@@ -3,7 +3,6 @@ package com.example.tutorlog.feature.add_event.composable
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -17,68 +16,96 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.example.tutorlog.R
 import com.example.tutorlog.design.LocalColors
+import com.example.tutorlog.domain.model.local.UIAdditionPupil
+import com.example.tutorlog.domain.types.EventFrequencyType
+import java.time.LocalTime
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEventScreenComposable(
+    eventName: String,
+    onEventNameEntered: (String) -> Unit,
+    description: String,
+    onDescriptionEntered: (String) -> Unit,
+    date: String,
+    startTime: String,
+    endTime: String,
+    repeatUntil: String,
+    frequency: EventFrequencyType,
+    onDateClicked: (Pair<Int, Long>) -> Unit,
+    onTimeClicked: (Pair<Int, String>) -> Unit,
+    onFrequencyClicked: (EventFrequencyType) -> Unit,
+    selectedDayList: List<Int>,
+    onSelectedDayClick: (Int) -> Unit,
+    selectablePupilList: List<UIAdditionPupil>,
     onBackClick: () -> Unit = {},
     onSubmit: () -> Unit = {},
+    onPupilToggled: (Int) -> Unit = {},
+    onSelectAllPupils: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    var showPupilModal by remember { mutableStateOf(false) }
-    var frequency by remember { mutableStateOf("Repeat") } // "One-time" or "Repeat"
+    var showDatePicker by remember { mutableStateOf(DatePickerMode.NONE) }
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis >= System.currentTimeMillis()
+            }
+        }
+    )
 
-    // Form States
-    var eventName by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
-    var startTime by remember { mutableStateOf("14:00") }
-    var endTime by remember { mutableStateOf("15:00") }
+    var activeTimePickerMode by remember { mutableStateOf(TimePickerMode.NONE) }
+    val currentTime = LocalTime.now()
+    val timePickerState = rememberTimePickerState(
+        initialHour = currentTime.hour,
+        initialMinute = currentTime.minute,
+        is24Hour = true
+    )
+    var showPupilBottomSheet by remember { mutableStateOf(false) }
 
     // Repeat Logic
-    val daysOfWeek = listOf("S", "M", "T", "W", "T", "F", "S")
-    val selectedDays = remember { mutableStateListOf<Int>() }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -114,18 +141,18 @@ fun AddEventScreenComposable(
             )
         }
         // Event Name
-        CustomTextField(
-            label = "Event Name",
+        AddEventTextField(
+            label = "Title",
             value = eventName,
-            onValueChange = { eventName = it },
+            onValueChange = { onEventNameEntered.invoke(it) },
             placeholder = "e.g. Masterclass with Jane"
         )
 
         // Description
-        CustomTextField(
+        AddEventTextField(
             label = "Description",
             value = description,
-            onValueChange = { description = it },
+            onValueChange = { onDescriptionEntered.invoke(it) },
             placeholder = "Add more details about this session...",
             singleLine = false,
             height = 80.dp
@@ -140,47 +167,42 @@ fun AddEventScreenComposable(
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                ParticipantButton(
-                    icon = R.drawable.ic_person,
-                    label = "Add Pupil",
-                    onClick = { showPupilModal = true },
-                    modifier = Modifier.weight(1f)
-                )
-                ParticipantButton(
-                    icon = R.drawable.ic_group,
-                    label = "Add Group",
-                    onClick = { /* TODO */ },
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            ParticipantButton(
+                icon = R.drawable.ic_person,
+                label = if (selectablePupilList.any { it.isSelected == true })
+                    "${selectablePupilList.count { it.isSelected }} pupils selected" else "Add Pupil",
+                onClick = { showPupilBottomSheet = true },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         // Date
-        CustomIconTextField(
+        DateSelectorRowComposable(
+            onClick = { showDatePicker = DatePickerMode.START },
             label = "Date",
-            value = date,
-            onValueChange = { date = it },
-            icon = R.drawable.ic_calendar,
-            isDate = true
+            date = date,
         )
 
         // Time Row
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Box(modifier = Modifier.weight(1f)) {
-                CustomTextField(
+                TappableIconComposable(
                     label = "Start Time",
                     value = startTime,
-                    onValueChange = { startTime = it },
-                    isTime = true
+                    onClick = {
+                        activeTimePickerMode = TimePickerMode.START
+                    },
+                    icon = R.drawable.ic_start_time
                 )
             }
             Box(modifier = Modifier.weight(1f)) {
-                CustomTextField(
+                TappableIconComposable(
                     label = "End Time",
                     value = endTime,
-                    onValueChange = { endTime = it },
-                    isTime = true
+                    onClick = {
+                        activeTimePickerMode = TimePickerMode.END
+                    },
+                    icon = R.drawable.ic_end_time
                 )
             }
         }
@@ -197,29 +219,30 @@ fun AddEventScreenComposable(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FrequencyOption(
+                FrequencyOptionComposable(
                     text = "One-time",
-                    selected = frequency == "One-time",
-                    onClick = { frequency = "One-time" },
+                    selected = frequency == EventFrequencyType.ONE_TIME,
+                    onClick = { onFrequencyClicked.invoke(frequency) },
                     modifier = Modifier.weight(1f)
                 )
-                FrequencyOption(
+                FrequencyOptionComposable(
                     text = "Repeat",
-                    selected = frequency == "Repeat",
-                    onClick = { frequency = "Repeat" },
+                    selected = frequency == EventFrequencyType.REPEAT,
+                    onClick = {
+                        onFrequencyClicked.invoke(frequency)
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
 
-            if (frequency == "Repeat") {
+            if (frequency == EventFrequencyType.REPEAT) {
                 Column(
-                    modifier = Modifier.padding(top = 16.dp),
+                    modifier = Modifier.padding(top = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Occurs on Header
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
@@ -230,7 +253,7 @@ fun AddEventScreenComposable(
                         )
 
                         // Select Weekdays Chip
-                        val allWeekdaysSelected = (1..5).all { selectedDays.contains(it) }
+                        val allWeekdaysSelected = (1..5).all { selectedDayList.contains(it) }
                         Surface(
                             shape = CircleShape,
                             color = if (allWeekdaysSelected) LocalColors.PrimaryGreen else LocalColors.Gray800,
@@ -239,18 +262,7 @@ fun AddEventScreenComposable(
                                 if (allWeekdaysSelected) LocalColors.PrimaryGreen else LocalColors.Gray700
                             ),
                             modifier = Modifier.clickable {
-                                if (allWeekdaysSelected) {
-                                    selectedDays.removeAll(listOf(1, 2, 3, 4, 5))
-                                } else {
-                                    selectedDays.addAll(
-                                        listOf(
-                                            1,
-                                            2,
-                                            3,
-                                            4,
-                                            5
-                                        ).filter { !selectedDays.contains(it) })
-                                }
+
                             }
                         ) {
                             Text(
@@ -264,35 +276,21 @@ fun AddEventScreenComposable(
                     }
 
                     // Day Circles
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        daysOfWeek.forEachIndexed { index, day ->
-                            DayCircle(
-                                text = day,
-                                selected = selectedDays.contains(index),
-                                onClick = {
-                                    if (selectedDays.contains(index)) selectedDays.remove(index)
-                                    else selectedDays.add(index)
-                                }
-                            )
+                    DayCircle(
+                        selectedList = selectedDayList,
+                        onClick = {
+                            onSelectedDayClick.invoke(it)
                         }
-                    }
+                    )
 
-                    // Repeat Until
-                    CustomIconTextField(
+                    DateSelectorRowComposable(
+                        onClick = { showDatePicker = DatePickerMode.REPEAT_UNTIL },
                         label = "Repeat Until",
-                        value = "",
-                        onValueChange = {},
-                        icon = R.drawable.ic_repeat,
-                        isDate = true
+                        date = repeatUntil,
                     )
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         // Submit Button
         Button(
@@ -315,98 +313,90 @@ fun AddEventScreenComposable(
 
         Spacer(modifier = Modifier.height(32.dp))
     }
+    if (showDatePicker != DatePickerMode.NONE) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = DatePickerMode.NONE },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (showDatePicker == DatePickerMode.START) {
+                            onDateClicked.invoke(Pair(0, datePickerState.selectedDateMillis ?: 0L))
+                        } else {
+                            onDateClicked.invoke(Pair(1, datePickerState.selectedDateMillis ?: 0L))
+                        }
+                        showDatePicker = DatePickerMode.NONE
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = DatePickerMode.NONE }) {
+                    Text("Cancel")
+                }
+            },
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 
-    if (showPupilModal) {
-        PupilSelectionModal(onDismiss = { showPupilModal = false })
+    if (activeTimePickerMode != TimePickerMode.NONE) {
+        DialTimePickerDialog(
+            onDismiss = { activeTimePickerMode = TimePickerMode.NONE },
+            onConfirm = {
+                onTimeClicked.invoke(
+                    if (activeTimePickerMode == TimePickerMode.START) {
+                        Pair(
+                            0, "${timePickerState.hour}-${timePickerState.minute}"
+                        )
+                    } else {
+                        Pair(
+                            1, "${timePickerState.hour}-${timePickerState.minute}"
+                        )
+                    }
+                )
+                activeTimePickerMode = TimePickerMode.NONE
+            }
+        ) {
+            // This is the actual clock UI
+            TimePicker(state = timePickerState)
+        }
+    }
+
+    // Pupil Selection Bottom Sheet
+    if (showPupilBottomSheet) {
+        PupilSelectionBottomSheet(
+            pupils = selectablePupilList,
+            onDismiss = { showPupilBottomSheet = false },
+            onPupilToggled = onPupilToggled,
+            onSelectAll = onSelectAllPupils
+        )
     }
 }
 
 // --- Helper Components ---
-
 @Composable
-fun CustomTextField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String = "",
-    singleLine: Boolean = true,
-    height: androidx.compose.ui.unit.Dp? = null,
-    isTime: Boolean = false
+fun DialTimePickerDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    content: @Composable () -> Unit
 ) {
-    Column {
-        Text(
-            label,
-            color = LocalColors.Gray400,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(if (height != null) Modifier.height(height) else Modifier)
-                .border(1.dp, LocalColors.Gray700, RoundedCornerShape(12.dp))
-                .clip(RoundedCornerShape(12.dp)),
-            placeholder = { Text(placeholder, color = Color.Gray) },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = LocalColors.Gray800,
-                unfocusedContainerColor = LocalColors.Gray800,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = LocalColors.PrimaryGreen
-            ),
-            singleLine = singleLine
-        )
-    }
-}
-
-@Composable
-fun CustomIconTextField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    @DrawableRes icon: Int,
-    isDate: Boolean = false
-) {
-    Column {
-        Text(
-            label,
-            color = LocalColors.Gray400,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = null,
-                    tint = LocalColors.Gray400,
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, LocalColors.Gray700, RoundedCornerShape(12.dp))
-                .clip(RoundedCornerShape(12.dp)),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = LocalColors.Gray800,
-                unfocusedContainerColor = LocalColors.Gray800,
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = LocalColors.PrimaryGreen
-            ),
-            singleLine = true
-        )
-    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        dismissButton = {
+            TextButton(onClick = { onDismiss() }) {
+                Text("Cancel")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm() }) {
+                Text("OK")
+            }
+        },
+        text = {
+            content()
+        }
+    )
 }
 
 @Composable
@@ -426,6 +416,7 @@ fun ParticipantButton(
         Row(
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
             Box(
                 modifier = Modifier
@@ -447,176 +438,77 @@ fun ParticipantButton(
 }
 
 @Composable
-fun FrequencyOption(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+fun BottomSheetSearchBar(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String
 ) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        color = if (selected) LocalColors.PrimaryGreen else LocalColors.Gray800,
-        border = if (selected) null else BorderStroke(1.dp, LocalColors.Gray700),
-        modifier = modifier
-    ) {
-        Box(modifier = Modifier.padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
-            Text(
-                text,
-                color = if (selected) Color.Black else Color.White,
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}
-
-@Composable
-fun DayCircle(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(if (selected) LocalColors.PrimaryGreen else LocalColors.Gray800)
-            .border(
-                1.dp,
-                if (selected) LocalColors.PrimaryGreen else LocalColors.Gray700,
-                CircleShape
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text,
-            color = if (selected) Color.Black else Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp
-        )
-    }
-}
-
-@Composable
-fun PupilSelectionModal(onDismiss: () -> Unit) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .wrapContentHeight(),
-            shape = RoundedCornerShape(16.dp),
-            color = LocalColors.Gray800,
-            border = BorderStroke(1.dp, LocalColors.Gray700)
-        ) {
-            Column {
-                // Header
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .border(0.dp, Color.Transparent, RoundedCornerShape(0.dp)),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Select Pupil",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = LocalColors.Gray400
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 16.sp),
+        cursorBrush = SolidColor(LocalColors.PrimaryGreen),
+        decorationBox = { innerTextField ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .background(LocalColors.Gray900, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Box(contentAlignment = Alignment.CenterStart) {
+                    if (value.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            color = Color.Gray,
+                            fontSize = 14.sp
                         )
                     }
-                }
-                HorizontalDivider(color = LocalColors.Gray700)
-
-                // Content
-                Column(modifier = Modifier.padding(16.dp)) {
-                    // Search
-                    TextField(
-                        value = "",
-                        onValueChange = {},
-                        placeholder = {
-                            Text(
-                                "Search pupils...",
-                                color = Color.Gray,
-                                fontSize = 14.sp
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = null,
-                                tint = Color.Gray
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp)),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = LocalColors.Gray900,
-                            unfocusedContainerColor = LocalColors.Gray900,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // List Item
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onDismiss() }
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF3B82F6).copy(alpha = 0.1f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("JD", color = Color(0xFF60A5FA), fontWeight = FontWeight.Bold)
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 12.dp)
-                                .weight(1f)
-                        ) {
-                            Text("Jane Doe", color = Color.White, fontWeight = FontWeight.Medium)
-                            Text("Advanced Violin", color = LocalColors.Gray400, fontSize = 12.sp)
-                        }
-
-                        Icon(
-                            painter = painterResource(android.R.drawable.radiobutton_off_background), // Fallback or use icon
-                            contentDescription = null,
-                            tint = LocalColors.Gray400
-                        )
-                    }
+                    innerTextField()
                 }
             }
         }
-    }
+    )
 }
 
+enum class TimePickerMode {
+    START, END, NONE
+}
+
+enum class DatePickerMode {
+    START, REPEAT_UNTIL, NONE
+}
 
 @Preview
 @Composable
 private fun PreviewAddEventScreen() {
     AddEventScreenComposable(
+        selectablePupilList = emptyList(),
+        eventName = "Cool class",
+        onEventNameEntered = {},
         modifier = Modifier
             .fillMaxSize()
-            .background(LocalColors.BackgroundDefaultDark)
+            .background(LocalColors.BackgroundDefaultDark),
+        description = "",
+        onDescriptionEntered = {},
+        startTime = "",
+        endTime = "",
+        date = "",
+        frequency = EventFrequencyType.REPEAT,
+        onDateClicked = {},
+        onTimeClicked = {},
+        onFrequencyClicked = {},
+        selectedDayList = listOf(1, 4),
+        onSelectedDayClick = {},
+        repeatUntil = ""
     )
 }
