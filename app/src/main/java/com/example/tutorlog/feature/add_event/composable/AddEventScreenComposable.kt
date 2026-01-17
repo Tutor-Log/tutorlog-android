@@ -300,7 +300,8 @@ fun AddEventScreenComposable(
                         selectedList = selectedDayList,
                         onClick = {
                             onSelectedDayClick.invoke(it)
-                            if (selectedDayList.isNotEmpty() || it >= 0) repeatDaysError = false
+                            // Clear error after a day is clicked (list will be updated by the callback)
+                            repeatDaysError = false
                         },
                         isError = repeatDaysError,
                         shakeTrigger = validationTrigger

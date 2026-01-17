@@ -37,11 +37,11 @@ fun DayCircle(
         modifier = Modifier
             .shake(trigger = shakeTrigger, enabled = isError)
             .border(
-                width = if (isError) 1.dp else 0.dp,
+                width = 1.dp,
                 color = if (isError) LocalColors.Red500 else Color.Transparent,
                 shape = RoundedCornerShape(12.dp)
             )
-            .padding(if (isError) 8.dp else 0.dp)
+            .padding(8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
