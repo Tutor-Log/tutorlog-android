@@ -72,13 +72,10 @@ import com.example.tutorlog.utils.getInitials
 @Composable
 fun AddEventScreenComposable(
     selectablePupilList: List<UIAdditionPupil>,
-    selectableGroupList: List<UIAdditionGroup>,
     onBackClick: () -> Unit = {},
     onSubmit: () -> Unit = {},
     onPupilToggled: (Int) -> Unit = {},
-    onGroupToggled: (Int) -> Unit = {},
     onSelectAllPupils: () -> Unit = {},
-    onSelectAllGroups: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showPupilBottomSheet by remember { mutableStateOf(false) }
@@ -156,20 +153,12 @@ fun AddEventScreenComposable(
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                ParticipantButton(
-                    icon = R.drawable.ic_person,
-                    label = "Add Pupil",
-                    onClick = { showPupilBottomSheet = true },
-                    modifier = Modifier.weight(1f)
-                )
-                ParticipantButton(
-                    icon = R.drawable.ic_group,
-                    label = "Add Group",
-                    onClick = { showGroupBottomSheet = true },
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            ParticipantButton(
+                icon = R.drawable.ic_person,
+                label = "Add Pupil",
+                onClick = { showPupilBottomSheet = true },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         // Date
@@ -341,16 +330,6 @@ fun AddEventScreenComposable(
             onSelectAll = onSelectAllPupils
         )
     }
-
-    // Group Selection Bottom Sheet
-    if (showGroupBottomSheet) {
-        GroupSelectionBottomSheet(
-            groups = selectableGroupList,
-            onDismiss = { showGroupBottomSheet = false },
-            onGroupToggled = onGroupToggled,
-            onSelectAll = onSelectAllGroups
-        )
-    }
 }
 
 // --- Helper Components ---
@@ -458,6 +437,7 @@ fun ParticipantButton(
         Row(
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
             Box(
                 modifier = Modifier
@@ -618,129 +598,6 @@ fun PupilSelectionBottomSheet(
                         pupil = pupil,
                         onClick = { onPupilToggled(pupil.id) },
                         showDivider = index != filteredPupils.lastIndex
-                    )
-                }
-            }
-
-            // Bottom Action
-            if (selectedCount > 0) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(LocalColors.Gray900)
-                        .padding(16.dp)
-                ) {
-                    Button(
-                        onClick = onDismiss,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = LocalColors.PrimaryGreen,
-                            contentColor = LocalColors.Gray900
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(
-                            text = "Done ($selectedCount selected)",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GroupSelectionBottomSheet(
-    groups: List<UIAdditionGroup>,
-    onDismiss: () -> Unit,
-    onGroupToggled: (Int) -> Unit,
-    onSelectAll: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var searchQuery by remember { mutableStateOf("") }
-    
-    val filteredGroups = remember(searchQuery, groups) {
-        if (searchQuery.isEmpty()) groups
-        else groups.filter { it.name.contains(searchQuery, ignoreCase = true) }
-    }
-    
-    val selectedCount = groups.count { it.isSelected }
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = LocalColors.Gray800,
-        dragHandle = null
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-        ) {
-            // Header
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Select Groups",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Select All",
-                        color = LocalColors.PrimaryGreen,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .clickable(onClick = onSelectAll)
-                            .padding(8.dp)
-                    )
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = LocalColors.Gray400
-                        )
-                    }
-                }
-            }
-            HorizontalDivider(color = LocalColors.Gray700)
-
-            // Search Bar
-            BottomSheetSearchBar(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = "Search groups..."
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Group List
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp)
-                    .padding(horizontal = 16.dp)
-            ) {
-                itemsIndexed(filteredGroups) { index, group ->
-                    SelectableGroupItem(
-                        group = group,
-                        onClick = { onGroupToggled(group.id) },
-                        showDivider = index != filteredGroups.lastIndex
                     )
                 }
             }
@@ -993,7 +850,6 @@ fun SelectableGroupItem(
 private fun PreviewAddEventScreen() {
     AddEventScreenComposable(
         selectablePupilList = emptyList(),
-        selectableGroupList = emptyList(),
         modifier = Modifier
             .fillMaxSize()
             .background(LocalColors.BackgroundDefaultDark)
