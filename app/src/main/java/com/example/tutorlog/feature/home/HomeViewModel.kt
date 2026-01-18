@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tutorlog.domain.local_storage.LocalKey
 import com.example.tutorlog.domain.local_storage.PreferencesManager
+import com.example.tutorlog.domain.model.local.UIDateInfo
 import com.example.tutorlog.domain.types.BottomBarTabTypes
 import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.domain.usecase.RGetHomeScreenContentUseCase
@@ -13,6 +14,11 @@ import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,7 +31,38 @@ class HomeViewModel @Inject constructor(
     )
 
     init {
+
         getHomeScreenContent()
+        getDateList()
+    }
+
+    fun getDateList() {
+        intent {
+            val zoneId = ZoneId.systemDefault()
+            val today = LocalDate.now(zoneId)
+            val endOfYear = today.withDayOfYear(today.lengthOfYear())
+
+            val dateList = mutableListOf<UIDateInfo>()
+            var currentDate = today
+
+            while (!currentDate.isAfter(endOfYear)) {
+                val millis = currentDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
+
+                dateList.add(
+                    UIDateInfo(
+                        date = millis.getDayNumber(),
+                        day = millis.toDayName(),
+                        isSelected = currentDate.isEqual(today),
+                        dateInMillis = millis
+                    )
+                )
+                currentDate = currentDate.plusDays(1)
+            }
+
+            reduce {
+                state.copy(dateList = dateList)
+            }
+        }
     }
 
     fun getHomeScreenContent() {
@@ -96,5 +133,13 @@ class HomeViewModel @Inject constructor(
         intent {
             postSideEffect(HomeScreenSideEffect.NavigateToAddEventScreen)
         }
+    }
+    fun Long.toDayName(): String {
+        val formatter = SimpleDateFormat("EEE", Locale.getDefault())
+        return formatter.format(Date(this))
+    }
+    fun Long.getDayNumber(): String {
+        val formatter = SimpleDateFormat("dd", Locale.getDefault())
+        return formatter.format(Date(this))
     }
 }
