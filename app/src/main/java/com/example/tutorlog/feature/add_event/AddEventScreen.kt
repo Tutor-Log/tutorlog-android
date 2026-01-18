@@ -145,7 +145,6 @@ private fun InitializeAddEventScreen(
             showEndTimeError = state.showEndTimeError,
             showRepeatDaysError = state.showRepeatDaysError,
             showRepeatUntilError = state.showRepeatUntilError,
-            validationTrigger = state.validationTrigger
         )
     }
 }

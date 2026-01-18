@@ -17,21 +17,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tutorlog.design.LocalColors
-import com.example.tutorlog.utils.shake
+import com.example.tutorlog.design.shake
 
 @Composable
 fun AddEventTextField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
     placeholder: String = "",
     singleLine: Boolean = true,
     height: androidx.compose.ui.unit.Dp? = null,
     isError: Boolean = false,
-    shakeTrigger: Int = 0,
-    modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.shake(trigger = shakeTrigger, enabled = isError)) {
+    Column(modifier = modifier.shake(isShaking = isError)) {
         Text(
             label,
             color = LocalColors.Gray400,

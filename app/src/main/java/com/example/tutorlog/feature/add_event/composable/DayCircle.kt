@@ -23,19 +23,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tutorlog.design.LocalColors
-import com.example.tutorlog.utils.shake
+import com.example.tutorlog.design.shake
 
 @Composable
 fun DayCircle(
     selectedList: List<Int>,
     onClick: (Int) -> Unit,
-    isError: Boolean = false,
-    shakeTrigger: Int = 0
+    isError: Boolean,
 ) {
     val dayList = listOf("S", "M", "T", "W", "TH", "F", "S")
     Column(
         modifier = Modifier
-            .shake(trigger = shakeTrigger, enabled = isError)
+            .shake(isShaking = isError)
             .border(
                 width = 1.dp,
                 color = if (isError) LocalColors.Red500 else Color.Transparent,
@@ -77,7 +76,8 @@ fun DayCircle(
 @Composable
 private fun PreviewDayList() {
     DayCircle(
-        selectedList = listOf(1,4,5),
-        onClick = {}
+        selectedList = listOf(1, 4, 5),
+        onClick = {},
+        isError = false
     )
 }

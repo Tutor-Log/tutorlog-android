@@ -190,7 +190,6 @@ class AddEventViewModel @Inject constructor(
         selectedPupils: List<UIAdditionPupil>
     ) {
         intent {
-            // Reset all errors first
             var titleError = false
             var startTimeError = false
             var endTimeError = false
@@ -198,7 +197,6 @@ class AddEventViewModel @Inject constructor(
             var repeatUntilError = false
             var hasError = false
 
-            // Validate mandatory fields: title, startTime, endTime
             if (title.isBlank()) {
                 titleError = true
                 hasError = true
@@ -212,7 +210,6 @@ class AddEventViewModel @Inject constructor(
                 hasError = true
             }
 
-            // Additional mandatory fields for repeat frequency
             if (eventType == EventFrequencyType.REPEAT) {
                 if (repeatDays.isEmpty()) {
                     repeatDaysError = true
@@ -225,7 +222,6 @@ class AddEventViewModel @Inject constructor(
             }
 
             if (hasError) {
-                // Update state with errors and increment trigger for shake animation
                 reduce {
                     state.copy(
                         showTitleError = titleError,
@@ -233,11 +229,9 @@ class AddEventViewModel @Inject constructor(
                         showEndTimeError = endTimeError,
                         showRepeatDaysError = repeatDaysError,
                         showRepeatUntilError = repeatUntilError,
-                        validationTrigger = state.validationTrigger + 1
                     )
                 }
             } else {
-                // Clear all errors
                 reduce {
                     state.copy(
                         showTitleError = false,

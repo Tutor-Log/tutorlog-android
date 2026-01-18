@@ -80,17 +80,15 @@ fun AddEventScreenComposable(
     selectedDayList: List<Int>,
     onSelectedDayClick: (Int) -> Unit,
     selectablePupilList: List<UIAdditionPupil>,
-    onBackClick: () -> Unit = {},
-    onSubmit: () -> Unit = {},
-    onPupilToggled: (Int) -> Unit = {},
-    onSelectAllPupils: () -> Unit = {},
-    // Validation error states from ViewModel
-    showTitleError: Boolean = false,
-    showStartTimeError: Boolean = false,
-    showEndTimeError: Boolean = false,
-    showRepeatDaysError: Boolean = false,
-    showRepeatUntilError: Boolean = false,
-    validationTrigger: Int = 0,
+    onBackClick: () -> Unit,
+    onSubmit: () -> Unit,
+    onPupilToggled: (Int) -> Unit,
+    onSelectAllPupils: () -> Unit,
+    showTitleError: Boolean,
+    showStartTimeError: Boolean,
+    showEndTimeError: Boolean,
+    showRepeatDaysError: Boolean,
+    showRepeatUntilError: Boolean,
     modifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(DatePickerMode.NONE) }
@@ -154,7 +152,6 @@ fun AddEventScreenComposable(
             },
             placeholder = "e.g. Masterclass with Jane",
             isError = showTitleError,
-            shakeTrigger = validationTrigger
         )
 
         // Description
@@ -190,6 +187,7 @@ fun AddEventScreenComposable(
             onClick = { showDatePicker = DatePickerMode.START },
             label = "Date",
             date = date,
+            isError = showStartTimeError,
         )
 
         // Time Row
@@ -203,7 +201,6 @@ fun AddEventScreenComposable(
                     },
                     icon = R.drawable.ic_start_time,
                     isError = showStartTimeError,
-                    shakeTrigger = validationTrigger
                 )
             }
             Box(modifier = Modifier.weight(1f)) {
@@ -215,7 +212,6 @@ fun AddEventScreenComposable(
                     },
                     icon = R.drawable.ic_end_time,
                     isError = showEndTimeError,
-                    shakeTrigger = validationTrigger
                 )
             }
         }
@@ -295,7 +291,6 @@ fun AddEventScreenComposable(
                             onSelectedDayClick.invoke(it)
                         },
                         isError = showRepeatDaysError,
-                        shakeTrigger = validationTrigger
                     )
 
                     DateSelectorRowComposable(
@@ -303,7 +298,6 @@ fun AddEventScreenComposable(
                         label = "Repeat Until",
                         date = repeatUntil,
                         isError = showRepeatUntilError,
-                        shakeTrigger = validationTrigger
                     )
                 }
             }
@@ -526,6 +520,16 @@ private fun PreviewAddEventScreen() {
         onFrequencyClicked = {},
         selectedDayList = listOf(1, 4),
         onSelectedDayClick = {},
-        repeatUntil = ""
+        repeatUntil = "",
+        onBackClick = {},
+
+        onSubmit = {},
+        onPupilToggled = {},
+        onSelectAllPupils = {},
+        showTitleError = false,
+        showStartTimeError = false,
+        showEndTimeError = false,
+        showRepeatDaysError = false,
+        showRepeatUntilError = false,
     )
 }
