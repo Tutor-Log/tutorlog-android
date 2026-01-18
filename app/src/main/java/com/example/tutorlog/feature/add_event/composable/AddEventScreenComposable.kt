@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,10 +81,17 @@ fun AddEventScreenComposable(
     selectedDayList: List<Int>,
     onSelectedDayClick: (Int) -> Unit,
     selectablePupilList: List<UIAdditionPupil>,
-    onBackClick: () -> Unit = {},
-    onSubmit: () -> Unit = {},
-    onPupilToggled: (Int) -> Unit = {},
-    onSelectAllPupils: () -> Unit = {},
+    onBackClick: () -> Unit,
+    onSubmit: () -> Unit,
+    onPupilToggled: (Int) -> Unit,
+    onSelectAllPupils: () -> Unit,
+    showTitleError: Boolean,
+    showStartTimeError: Boolean,
+    showEndTimeError: Boolean,
+    showRepeatDaysError: Boolean,
+    showRepeatUntilError: Boolean,
+    isButtonLoading: Boolean,
+    showStartDateError: Boolean,
     modifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(DatePickerMode.NONE) }
@@ -103,8 +111,6 @@ fun AddEventScreenComposable(
         is24Hour = true
     )
     var showPupilBottomSheet by remember { mutableStateOf(false) }
-
-    // Repeat Logic
 
     Column(
         modifier = modifier
@@ -144,8 +150,11 @@ fun AddEventScreenComposable(
         AddEventTextField(
             label = "Title",
             value = eventName,
-            onValueChange = { onEventNameEntered.invoke(it) },
-            placeholder = "e.g. Masterclass with Jane"
+            onValueChange = {
+                onEventNameEntered.invoke(it)
+            },
+            placeholder = "e.g. Masterclass with Jane",
+            isError = showTitleError,
         )
 
         // Description
@@ -181,6 +190,7 @@ fun AddEventScreenComposable(
             onClick = { showDatePicker = DatePickerMode.START },
             label = "Date",
             date = date,
+            isError = showStartDateError,
         )
 
         // Time Row
@@ -192,7 +202,8 @@ fun AddEventScreenComposable(
                     onClick = {
                         activeTimePickerMode = TimePickerMode.START
                     },
-                    icon = R.drawable.ic_start_time
+                    icon = R.drawable.ic_start_time,
+                    isError = showStartTimeError,
                 )
             }
             Box(modifier = Modifier.weight(1f)) {
@@ -202,7 +213,8 @@ fun AddEventScreenComposable(
                     onClick = {
                         activeTimePickerMode = TimePickerMode.END
                     },
-                    icon = R.drawable.ic_end_time
+                    icon = R.drawable.ic_end_time,
+                    isError = showEndTimeError,
                 )
             }
         }
@@ -280,13 +292,15 @@ fun AddEventScreenComposable(
                         selectedList = selectedDayList,
                         onClick = {
                             onSelectedDayClick.invoke(it)
-                        }
+                        },
+                        isError = showRepeatDaysError,
                     )
 
                     DateSelectorRowComposable(
                         onClick = { showDatePicker = DatePickerMode.REPEAT_UNTIL },
                         label = "Repeat Until",
                         date = repeatUntil,
+                        isError = showRepeatUntilError,
                     )
                 }
             }
@@ -301,14 +315,18 @@ fun AddEventScreenComposable(
             colors = ButtonDefaults.buttonColors(containerColor = LocalColors.PrimaryGreen),
             shape = CircleShape
         ) {
-            Text(
-                "Schedule Event",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(Icons.Default.Settings, contentDescription = null, tint = Color.Black)
+            if (isButtonLoading) {
+                CircularProgressIndicator()
+            } else {
+                Text(
+                    "Schedule Event",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.Settings, contentDescription = null, tint = Color.Black)
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -347,11 +365,17 @@ fun AddEventScreenComposable(
                 onTimeClicked.invoke(
                     if (activeTimePickerMode == TimePickerMode.START) {
                         Pair(
-                            0, "${timePickerState.hour}-${timePickerState.minute}"
+                            0,
+                            "${
+                                timePickerState.hour.toString().padStart(2, '0')
+                            }:${timePickerState.minute.toString().padStart(2, '0')}"
                         )
                     } else {
                         Pair(
-                            1, "${timePickerState.hour}-${timePickerState.minute}"
+                            1,
+                            "${
+                                timePickerState.hour.toString().padStart(2, '0')
+                            }:${timePickerState.minute.toString().padStart(2, '0')}"
                         )
                     }
                 )
@@ -503,12 +527,24 @@ private fun PreviewAddEventScreen() {
         startTime = "",
         endTime = "",
         date = "",
-        frequency = EventFrequencyType.REPEAT,
+        frequency = EventFrequencyType.ONE_TIME,
         onDateClicked = {},
         onTimeClicked = {},
         onFrequencyClicked = {},
         selectedDayList = listOf(1, 4),
         onSelectedDayClick = {},
-        repeatUntil = ""
+        repeatUntil = "",
+        onBackClick = {},
+
+        onSubmit = {},
+        onPupilToggled = {},
+        onSelectAllPupils = {},
+        showTitleError = false,
+        showStartTimeError = false,
+        showEndTimeError = false,
+        showRepeatDaysError = false,
+        showRepeatUntilError = false,
+        isButtonLoading = true,
+        showStartDateError = true
     )
 }

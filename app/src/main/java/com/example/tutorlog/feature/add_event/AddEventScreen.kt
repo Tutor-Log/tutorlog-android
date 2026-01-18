@@ -1,5 +1,6 @@
 package com.example.tutorlog.feature.add_event
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.LocalColors
 import com.example.tutorlog.design.TFullScreenErrorComposable
@@ -19,6 +21,8 @@ import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.add_event.composable.AddEventScreenComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AddEventScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.StudentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -31,10 +35,20 @@ fun AddEventScreen(
     viewModel: AddEventViewModel = hiltViewModel()
 ) {
     val state by viewModel.collectAsState()
+    val context = LocalContext.current
 
     viewModel.collectSideEffect {
         when (it) {
-
+            is AddEventSideEffect.ShowToast -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            }
+            is AddEventSideEffect.NavigateToHomeScreen -> {
+                navigator.navigate(StudentScreenDestination) {
+                    popUpTo(AddEventScreenDestination) {
+                        inclusive = true
+                    }
+                }
+            }
         }
     }
 
@@ -138,7 +152,14 @@ private fun InitializeAddEventScreen(
                     day = it
                 )
             },
-            repeatUntil = state.repeatUntil
+            repeatUntil = state.repeatUntil,
+            showTitleError = state.showTitleError,
+            showStartTimeError = state.showStartTimeError,
+            showEndTimeError = state.showEndTimeError,
+            showRepeatDaysError = state.showRepeatDaysError,
+            showRepeatUntilError = state.showRepeatUntilError,
+            showStartDateError = state.showStartDateError,
+            isButtonLoading = state.isButtonLoading
         )
     }
 }

@@ -33,7 +33,7 @@ import com.example.tutorlog.design.TFullScreenErrorComposable
 import com.example.tutorlog.design.TFullScreenLoaderComposable
 import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.home.composables.DateSliderComposable
-import com.example.tutorlog.feature.home.composables.PupilClassTimingComposable
+import com.example.tutorlog.feature.home.composables.EventCardComposable
 import com.example.tutorlog.feature.home.composables.TopInfoBarComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -63,7 +63,7 @@ fun HomeScreen(
             }
         }
     }
-    when(state.uiState) {
+    when (state.uiState) {
 
         UIState.SUCCESS -> {
             InitializeHomeScreen(
@@ -81,6 +81,7 @@ fun HomeScreen(
                 viewModel.getHomeScreenContent()
             }
         }
+
         else -> {}
     }
 }
@@ -89,7 +90,8 @@ fun HomeScreen(
 fun InitializeHomeScreen(
     state: HomeScreenState,
     viewModel: HomeViewModel,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         modifier = modifier
             .background(color = LocalColors.BackgroundDefaultDark)
@@ -140,11 +142,10 @@ fun InitializeHomeScreen(
                 .padding(top = 16.dp)
         ) {
             DateSliderComposable(
-                dateInfoList = state.dateInfoList,
-                selectedInt = state.selectedDateIndex,
+                dayList = state.dateList,
                 onClick = {
 
-                },
+                }
             )
             Column(
                 modifier = Modifier
@@ -153,12 +154,14 @@ fun InitializeHomeScreen(
                     .padding(horizontal = 24.dp)
                     .padding(top = 24.dp)
             ) {
-                state.pupilClassList.forEach { pupilClass ->
-                    PupilClassTimingComposable(
-                        timing = pupilClass.timing,
-                        image = pupilClass.image,
-                        name = pupilClass.name,
-                        level = pupilClass.level
+                state.pupilList.forEach { item ->
+                    EventCardComposable(
+                        isRepeat = item.isRepeat,
+                        time = item.time,
+                        meridiem = item.meridiem,
+                        title = item.title,
+                        subtitle = item.subtitle,
+                        description = item.description
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }

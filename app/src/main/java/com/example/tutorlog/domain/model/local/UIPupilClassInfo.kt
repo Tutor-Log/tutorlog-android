@@ -1,8 +1,10 @@
 package com.example.tutorlog.domain.model.local
 
 data class UIPupilClassInfo(
-    val timing: String,
-    val image: String,
-    val name: String,
-    val level: String,
+    val isRepeat: Boolean,
+    val time: String,
+    val meridiem: String,
+    val title: String,
+    val subtitle: String,
+    val description: String,
 )

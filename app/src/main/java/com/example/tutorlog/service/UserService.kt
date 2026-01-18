@@ -4,6 +4,8 @@ import com.example.tutorlog.domain.model.remote.AddPupilPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilResponse
 import com.example.tutorlog.domain.model.remote.AddPupilToGroupPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilToGroupResponseItem
+import com.example.tutorlog.domain.model.remote.CreateEventPostBody
+import com.example.tutorlog.domain.model.remote.CreateEventResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
@@ -72,4 +74,11 @@ interface UserService {
         @Query("current_user_id") userId: Int,
         @Body pupilList: List<AddPupilToGroupPostBody>
     ): Response<List<AddPupilToGroupResponseItem>>
+
+
+    @POST("events/")
+    suspend fun createEvent(
+        @Query("current_user_id") userId: Int,
+        @Body createEventPostBody: CreateEventPostBody
+    ): Response<CreateEventResponse>
 }
