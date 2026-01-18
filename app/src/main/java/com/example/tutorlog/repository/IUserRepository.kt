@@ -5,6 +5,8 @@ import com.example.tutorlog.domain.model.remote.AddPupilPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilResponse
 import com.example.tutorlog.domain.model.remote.AddPupilToGroupPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilToGroupResponseItem
+import com.example.tutorlog.domain.model.remote.CreateEventPostBody
+import com.example.tutorlog.domain.model.remote.CreateEventResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.GetAllGroupMemberResponse
@@ -37,5 +39,7 @@ interface IUserRepository {
     suspend fun getPerGroupInfo(userId: Int, groupId: Int): Flow<Response<CreateGroupResponse>>
 
     suspend fun addPupilToGroup(userId: Int, groupId: Int, pupilList: List<AddPupilToGroupPostBody>): Flow<Response<List<AddPupilToGroupResponseItem>>>
+
+    suspend fun createEvent(userId: Int, createEventPostBody: CreateEventPostBody): Flow<Response<CreateEventResponse>>
 
 }

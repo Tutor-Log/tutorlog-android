@@ -22,4 +22,6 @@ data class AddEventState(
     val showEndTimeError: Boolean = false,
     val showRepeatDaysError: Boolean = false,
     val showRepeatUntilError: Boolean = false,
+    val showStartDateError: Boolean = false,
+    val isButtonLoading: Boolean = false
 )

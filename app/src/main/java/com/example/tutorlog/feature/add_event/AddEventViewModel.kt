@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tutorlog.domain.model.local.UIAdditionPupil
 import com.example.tutorlog.domain.types.EventFrequencyType
 import com.example.tutorlog.domain.types.UIState
+import com.example.tutorlog.domain.usecase.RCreateEventUseCase
 import com.example.tutorlog.domain.usecase.RGetStudentGroupUseCase
 import com.example.tutorlog.domain.usecase.base.Either
 import com.example.tutorlog.utils.convertToDdMmmYy
@@ -21,7 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddEventViewModel @Inject constructor(
-    private val getStudentGroupUseCase: RGetStudentGroupUseCase
+    private val getStudentGroupUseCase: RGetStudentGroupUseCase,
+    private val createEventUseCase: RCreateEventUseCase,
 ) : ContainerHost<AddEventState, AddEventSideEffect>, ViewModel() {
 
     override val container: Container<AddEventState, AddEventSideEffect> =
@@ -93,11 +95,11 @@ class AddEventViewModel @Inject constructor(
 
     fun onEventNameEntered(eventName: String) {
         intent {
-            reduce { 
+            reduce {
                 state.copy(
                     eventName = eventName,
                     showTitleError = if (eventName.isNotEmpty()) false else state.showTitleError
-                ) 
+                )
             }
         }
     }
@@ -109,10 +111,12 @@ class AddEventViewModel @Inject constructor(
     }
 
     fun onStartDateClick(date: Long) {
+        println("karl : ")
         intent {
             reduce {
                 state.copy(
-                    date = date.convertToDdMmmYy()
+                    date = date.convertToDdMmmYy(),
+                    showStartDateError = false
                 )
             }
         }
@@ -150,7 +154,7 @@ class AddEventViewModel @Inject constructor(
         }
     }
 
-    fun updateSelectedDays(selectedList: List<Int>,day: Int) {
+    fun updateSelectedDays(selectedList: List<Int>, day: Int) {
         val updatedList = selectedList.toMutableList()
         if (day !in selectedList) {
             updatedList.add(day)
@@ -196,7 +200,13 @@ class AddEventViewModel @Inject constructor(
             var repeatDaysError = false
             var repeatUntilError = false
             var hasError = false
+            var showStartDateError = false
 
+            if (date.isEmpty()) {
+                hasError = true
+                showStartDateError = true
+
+            }
             if (title.isBlank()) {
                 titleError = true
                 hasError = true
@@ -229,6 +239,7 @@ class AddEventViewModel @Inject constructor(
                         showEndTimeError = endTimeError,
                         showRepeatDaysError = repeatDaysError,
                         showRepeatUntilError = repeatUntilError,
+                        showStartDateError = showStartDateError
                     )
                 }
             } else {
@@ -238,20 +249,53 @@ class AddEventViewModel @Inject constructor(
                         showStartTimeError = false,
                         showEndTimeError = false,
                         showRepeatDaysError = false,
-                        showRepeatUntilError = false
+                        showRepeatUntilError = false,
+                        showStartDateError = false
                     )
                 }
-                // All mandatory fields are filled, proceed with submit
-                // repeat_pattern -> weekly always
-                println("karl title: $title")
-                println("karl description: $description")
-                println("karl eventType: ${if (eventType == EventFrequencyType.ONE_TIME) "once" else "REPEAT" }")
-                println("karl date: ${convertToIsoDate(date)}")
-                println("karl startTime: $startTime")
-                println("karl endTime: $endTime")
-                println("karl repeatUntil: ${convertToIsoDate(repeatUntil)}")
-                println("karl repeatDays: $repeatDays")
-                println("karl selectedPupils: $selectedPupils")
+                viewModelScope.launch {
+                    reduce {
+                        state.copy(
+                            isButtonLoading = true
+                        )
+                    }
+                    createEventUseCase.process(
+                        RCreateEventUseCase.UCRequest(
+                            title = title,
+                            description = description,
+                            eventType = if (eventType == EventFrequencyType.ONE_TIME) "once" else "repeat",
+                            startTime = "${convertToIsoDate(date)}T$startTime:00.000Z",
+                            endTime = "${convertToIsoDate(date)}T$endTime:00.000Z",
+                            repeatUntil = if (repeatUntil.isEmpty()) null else convertToIsoDate(
+                                repeatUntil
+                            ),
+                            repeatDays = repeatDays,
+                            selectedPupils = selectedPupils.filter { it.isSelected == true }
+                                .map { it.id }
+                        )
+                    ).collect {
+                        when (it) {
+                            is Either.Success -> {
+                                reduce {
+                                    state.copy(
+                                        isButtonLoading = false
+                                    )
+                                }
+                                postSideEffect(AddEventSideEffect.ShowToast(message = "Event created"))
+                                postSideEffect(AddEventSideEffect.NavigateToHomeScreen)
+                            }
+
+                            is Either.Error -> {
+                                reduce {
+                                    state.copy(
+                                        isButtonLoading = false
+                                    )
+                                }
+                                postSideEffect(AddEventSideEffect.ShowToast(message = "Something went wrong"))
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -89,6 +90,8 @@ fun AddEventScreenComposable(
     showEndTimeError: Boolean,
     showRepeatDaysError: Boolean,
     showRepeatUntilError: Boolean,
+    isButtonLoading: Boolean,
+    showStartDateError: Boolean,
     modifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(DatePickerMode.NONE) }
@@ -147,7 +150,7 @@ fun AddEventScreenComposable(
         AddEventTextField(
             label = "Title",
             value = eventName,
-            onValueChange = { 
+            onValueChange = {
                 onEventNameEntered.invoke(it)
             },
             placeholder = "e.g. Masterclass with Jane",
@@ -187,7 +190,7 @@ fun AddEventScreenComposable(
             onClick = { showDatePicker = DatePickerMode.START },
             label = "Date",
             date = date,
-            isError = showStartTimeError,
+            isError = showStartDateError,
         )
 
         // Time Row
@@ -312,14 +315,18 @@ fun AddEventScreenComposable(
             colors = ButtonDefaults.buttonColors(containerColor = LocalColors.PrimaryGreen),
             shape = CircleShape
         ) {
-            Text(
-                "Schedule Event",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(Icons.Default.Settings, contentDescription = null, tint = Color.Black)
+            if (isButtonLoading) {
+                CircularProgressIndicator()
+            } else {
+                Text(
+                    "Schedule Event",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.Settings, contentDescription = null, tint = Color.Black)
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -358,11 +365,17 @@ fun AddEventScreenComposable(
                 onTimeClicked.invoke(
                     if (activeTimePickerMode == TimePickerMode.START) {
                         Pair(
-                            0, "${timePickerState.hour}-${timePickerState.minute}"
+                            0,
+                            "${
+                                timePickerState.hour.toString().padStart(2, '0')
+                            }:${timePickerState.minute.toString().padStart(2, '0')}"
                         )
                     } else {
                         Pair(
-                            1, "${timePickerState.hour}-${timePickerState.minute}"
+                            1,
+                            "${
+                                timePickerState.hour.toString().padStart(2, '0')
+                            }:${timePickerState.minute.toString().padStart(2, '0')}"
                         )
                     }
                 )
@@ -514,7 +527,7 @@ private fun PreviewAddEventScreen() {
         startTime = "",
         endTime = "",
         date = "",
-        frequency = EventFrequencyType.REPEAT,
+        frequency = EventFrequencyType.ONE_TIME,
         onDateClicked = {},
         onTimeClicked = {},
         onFrequencyClicked = {},
@@ -531,5 +544,7 @@ private fun PreviewAddEventScreen() {
         showEndTimeError = false,
         showRepeatDaysError = false,
         showRepeatUntilError = false,
+        isButtonLoading = true,
+        showStartDateError = true
     )
 }
