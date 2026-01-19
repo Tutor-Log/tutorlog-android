@@ -2,13 +2,13 @@ package com.example.tutorlog.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tutorlog.domain.local_storage.LocalKey
-import com.example.tutorlog.domain.local_storage.PreferencesManager
 import com.example.tutorlog.domain.model.local.UIDateInfo
 import com.example.tutorlog.domain.types.BottomBarTabTypes
 import com.example.tutorlog.domain.types.UIState
+import com.example.tutorlog.domain.usecase.RGetEventsUseCase
 import com.example.tutorlog.domain.usecase.RGetHomeScreenContentUseCase
 import com.example.tutorlog.domain.usecase.base.Either
+import com.example.tutorlog.utils.convertMillisToyyyyMMdd
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
@@ -23,16 +23,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val preferencesManager: PreferencesManager,
-    private val getHomeScreenContentUseCase: RGetHomeScreenContentUseCase
+    private val getHomeScreenContentUseCase: RGetHomeScreenContentUseCase,
+    private val getEventUseCase: RGetEventsUseCase
 ) : ContainerHost<HomeScreenState, HomeScreenSideEffect>, ViewModel() {
     override val container: Container<HomeScreenState, HomeScreenSideEffect> = container(
         HomeScreenState()
     )
 
     init {
-
-        getHomeScreenContent()
         getDateList()
     }
 
@@ -60,12 +58,19 @@ class HomeViewModel @Inject constructor(
             }
 
             reduce {
-                state.copy(dateList = dateList)
+                state.copy(
+                    dateList = dateList,
+                    currentDate = dateList.first().dateInMillis.convertMillisToyyyyMMdd()
+                )
             }
+            getHomeScreenContent(
+                startDate = dateList.first().dateInMillis.convertMillisToyyyyMMdd(),
+                endDate = dateList.first().dateInMillis.convertMillisToyyyyMMdd()
+            )
         }
     }
 
-    fun getHomeScreenContent() {
+    fun getHomeScreenContent(startDate: String, endDate: String) {
         viewModelScope.launch {
             intent {
                 reduce {
@@ -76,7 +81,8 @@ class HomeViewModel @Inject constructor(
             }
             getHomeScreenContentUseCase.process(
                 RGetHomeScreenContentUseCase.UCRequest(
-                    userId = preferencesManager.getInt(LocalKey.USER_ID)
+                    startDate = startDate,
+                    endDate = endDate
                 )
             )
                 .collect { result ->
@@ -87,11 +93,13 @@ class HomeViewModel @Inject constructor(
                                     state.copy(
                                         userName = result.data.userInfo.name,
                                         image = result.data.userInfo.iamge,
+                                        classList = result.data.eventList,
                                         uiState = UIState.SUCCESS
                                     )
                                 }
                             }
                         }
+
                         is Either.Error -> {
                             intent {
                                 reduce {
@@ -134,12 +142,88 @@ class HomeViewModel @Inject constructor(
             postSideEffect(HomeScreenSideEffect.NavigateToAddEventScreen)
         }
     }
+
+    fun navigateToEventDetail(eventId: Int) {
+        intent {
+            postSideEffect(
+                HomeScreenSideEffect.NavigateToEventDetail(
+                    eventId = eventId
+                )
+            )
+        }
+    }
+
     fun Long.toDayName(): String {
         val formatter = SimpleDateFormat("EEE", Locale.getDefault())
         return formatter.format(Date(this))
     }
+
     fun Long.getDayNumber(): String {
         val formatter = SimpleDateFormat("dd", Locale.getDefault())
         return formatter.format(Date(this))
+    }
+
+    fun onDateChanged(date: Long) {
+        intent {
+            reduce {
+                state.copy(
+                    dateList = state.dateList.map {
+                        it.copy(
+                            isSelected = it.dateInMillis == date,
+                        )
+                    },
+                )
+            }
+        }
+        getEvents(
+            startDate = date.convertMillisToyyyyMMdd(),
+            endDate = date.convertMillisToyyyyMMdd()
+        )
+    }
+
+    fun getEvents(startDate: String, endDate: String) {
+        intent {
+            reduce {
+                state.copy(
+                    isEventLoading = true
+                )
+            }
+        }
+        viewModelScope.launch {
+            getEventUseCase.process(
+                request = RGetEventsUseCase.UCRequest(
+                    startDate = startDate,
+                    endDate = endDate
+                )
+            ).collect {
+                when (it) {
+                    is Either.Success -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    classList = it.data.eventList,
+                                    isEventLoading = false
+                                )
+                            }
+                        }
+                    }
+
+                    is Either.Error -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    isEventLoading = false
+                                )
+                            }
+                            postSideEffect(
+                                HomeScreenSideEffect.ShowToast(
+                                    message = "Something went wrong"
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.tutorlog.service
 
+import android.R
 import com.example.tutorlog.domain.model.remote.AddPupilPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilResponse
 import com.example.tutorlog.domain.model.remote.AddPupilToGroupPostBody
@@ -7,8 +8,10 @@ import com.example.tutorlog.domain.model.remote.AddPupilToGroupResponseItem
 import com.example.tutorlog.domain.model.remote.CreateEventPostBody
 import com.example.tutorlog.domain.model.remote.CreateEventResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
+import com.example.tutorlog.domain.model.remote.GetEventsResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
+import com.example.tutorlog.domain.model.remote.EventPupilDetailResponse
 import com.example.tutorlog.domain.model.remote.GetAllGroupMemberResponse
 import com.example.tutorlog.domain.model.remote.GetPupilResponse
 import com.example.tutorlog.domain.model.remote.HealthResponse
@@ -81,4 +84,17 @@ interface UserService {
         @Query("current_user_id") userId: Int,
         @Body createEventPostBody: CreateEventPostBody
     ): Response<CreateEventResponse>
+
+    @GET("events/")
+    suspend fun getEvents(
+        @Query("owner_id") userId: Int,
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String
+    ): Response<List<GetEventsResponse>>
+
+    @GET("events/{eventId}/pupils")
+    suspend fun getEventPupilList(
+        @Path("eventId") eventId: Int,
+        @Query("current_user_id") userId: Int,
+    ): Response<List<EventPupilDetailResponse>>
 }

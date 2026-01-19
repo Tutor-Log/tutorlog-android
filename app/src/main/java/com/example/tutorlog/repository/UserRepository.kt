@@ -9,7 +9,9 @@ import com.example.tutorlog.domain.model.remote.CreateEventResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
+import com.example.tutorlog.domain.model.remote.EventPupilDetailResponse
 import com.example.tutorlog.domain.model.remote.GetAllGroupMemberResponse
+import com.example.tutorlog.domain.model.remote.GetEventsResponse
 import com.example.tutorlog.domain.model.remote.GetPupilResponse
 import com.example.tutorlog.domain.model.remote.HealthResponse
 import com.example.tutorlog.domain.model.remote.UserInfoResponse
@@ -228,6 +230,44 @@ class UserRepository @Inject constructor(
             val response = userService.createEvent(
                 userId = userId,
                 createEventPostBody = createEventPostBody
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(
+                Response.error(
+                    500,
+                    okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")
+                )
+            )
+        }
+    }
+
+    override suspend fun getEvents(userId: Int, startDate: String, endDate: String): Flow<Response<List<GetEventsResponse>>> = flow {
+        try {
+            val response = userService.getEvents(
+                userId = userId,
+                startDate = startDate,
+                endDate = endDate
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(
+                Response.error(
+                    500,
+                    okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")
+                )
+            )
+        }
+    }
+
+    override suspend fun getEventPupilList(
+        userId: Int,
+        eventId: Int
+    ): Flow<Response<List<EventPupilDetailResponse>>> = flow {
+        try {
+            val response = userService.getEventPupilList(
+                userId = userId,
+                eventId = eventId,
             )
             emit(response)
         } catch (e: Exception) {

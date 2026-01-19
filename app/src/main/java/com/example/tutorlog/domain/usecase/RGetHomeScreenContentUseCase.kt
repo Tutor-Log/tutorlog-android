@@ -1,41 +1,74 @@
 package com.example.tutorlog.domain.usecase
 
+import com.example.tutorlog.domain.local_storage.LocalKey
+import com.example.tutorlog.domain.local_storage.PreferencesManager
+import com.example.tutorlog.domain.model.local.UIClassInfo
 import com.example.tutorlog.domain.model.local.UIUserInfo
 import com.example.tutorlog.domain.usecase.base.Either
 import com.example.tutorlog.repository.IUserRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 import javax.inject.Inject
 
 class RGetHomeScreenContentUseCase @Inject constructor(
     private val userRepository: IUserRepository,
+    private val preferencesManager: PreferencesManager
 ) {
     suspend fun process(request: UCRequest): Flow<Either<UCResponse>> {
-        return userRepository.getUserById(
-            userId = request.userId
+        val userId = preferencesManager.getInt(LocalKey.USER_ID)
+        
+        val userFlow = userRepository.getUserById(userId = userId)
+        val eventsFlow = userRepository.getEvents(
+            userId = userId,
+            startDate = request.startDate,
+            endDate = request.endDate
         )
-            .map { response ->
-                if (response.isSuccessful) {
-                    val user = UIUserInfo(
-                        id = response.body()?.id ?: 0,
-                        googleId = response.body()?.google_user_id.orEmpty(),
-                        name = response.body()?.full_name.orEmpty().toTitleCase(),
-                        email = response.body()?.email.orEmpty(),
-                        iamge = response.body()?.profile_pic_url.orEmpty()
-                    )
-                    Either.Success(UCResponse(userInfo = user))
+        
+        return userFlow.combine(eventsFlow) { userResponse, eventsResponse ->
+            if (userResponse.isSuccessful) {
+                val user = UIUserInfo(
+                    id = userResponse.body()?.id ?: 0,
+                    googleId = userResponse.body()?.google_user_id.orEmpty(),
+                    name = userResponse.body()?.full_name.orEmpty().toTitleCase(),
+                    email = userResponse.body()?.email.orEmpty(),
+                    iamge = userResponse.body()?.profile_pic_url.orEmpty()
+                )
+                
+                val events = if (eventsResponse.isSuccessful) {
+                    eventsResponse.body()?.map { event ->
+                        val (time, meridiem) = parseTime(event.start_time)
+                        UIClassInfo(
+                            isRepeat = event.is_repeat_instance == true,
+                            time = time,
+                            meridiem = meridiem,
+                            title = event.title.orEmpty(),
+                            subtitle = event.event_type.orEmpty(),
+                            description = event.description.orEmpty(),
+                            id = event.id ?: 0
+                        )
+                    } ?: emptyList()
                 } else {
-                    Either.Error(Exception("Error fetching users: ${response.code()} ${response.message()}"))
+                    emptyList()
                 }
+                
+                Either.Success(UCResponse(userInfo = user, eventList = events))
+            } else {
+                Either.Error(Exception("Error fetching users: ${userResponse.code()} ${userResponse.message()}"))
             }
+        }
     }
 
     data class UCRequest(
-        val userId: Int
+        val startDate: String,
+        val endDate: String
     )
 
     data class UCResponse(
-        val userInfo: UIUserInfo
+        val userInfo: UIUserInfo,
+        val eventList: List<UIClassInfo>
     )
 }
 
@@ -45,4 +78,24 @@ fun String.toTitleCase(): String {
         .joinToString(" ") { word ->
             word.replaceFirstChar { it.uppercase() }
         }
+}
+
+fun parseTime(startTime: String?): Pair<String, String> {
+    if (startTime.isNullOrEmpty()) {
+        return Pair("00:00", "AM")
+    }
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val date = inputFormat.parse(startTime) ?: return Pair("00:00", "AM")
+
+        val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+        val meridiemFormat = SimpleDateFormat("a", Locale.getDefault())
+
+        val time = timeFormat.format(date)
+        val meridiem = meridiemFormat.format(date).uppercase()
+
+        Pair(time, meridiem)
+    } catch (e: Exception) {
+        Pair("00:00", "AM")
+    }
 }

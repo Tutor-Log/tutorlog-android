@@ -14,7 +14,7 @@ fun String?.getInitials(limit: Int = 2): String {
         .joinToString("") { it.first().uppercase() }
 }
 
-fun Long.convertMillisToDate(): String {
+fun Long.convertMillisToyyyyMMdd(): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     return formatter.format(Date(this))
 }
