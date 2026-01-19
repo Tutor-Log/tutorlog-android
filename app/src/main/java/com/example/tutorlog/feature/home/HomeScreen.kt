@@ -154,7 +154,7 @@ fun InitializeHomeScreen(
                     .padding(horizontal = 24.dp)
                     .padding(top = 24.dp)
             ) {
-                state.pupilList.forEach { item ->
+                state.classList.forEach { item ->
                     EventCardComposable(
                         isRepeat = item.isRepeat,
                         time = item.time,

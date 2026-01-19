@@ -241,10 +241,12 @@ class UserRepository @Inject constructor(
         }
     }
 
-    override suspend fun getEvents(userId: Int): Flow<Response<List<GetEventsResponse>>> = flow {
+    override suspend fun getEvents(userId: Int, startDate: String, endDate: String): Flow<Response<List<GetEventsResponse>>> = flow {
         try {
             val response = userService.getEvents(
-                userId = userId
+                userId = userId,
+                startDate = startDate,
+                endDate = endDate
             )
             emit(response)
         } catch (e: Exception) {

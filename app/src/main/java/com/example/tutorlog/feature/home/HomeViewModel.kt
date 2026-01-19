@@ -10,6 +10,7 @@ import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.domain.usecase.RGetEventsUseCase
 import com.example.tutorlog.domain.usecase.RGetHomeScreenContentUseCase
 import com.example.tutorlog.domain.usecase.base.Either
+import com.example.tutorlog.utils.convertMillisToDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
@@ -64,6 +65,10 @@ class HomeViewModel @Inject constructor(
             reduce {
                 state.copy(dateList = dateList)
             }
+            getEvents(
+                startDate = dateList.first().dateInMillis.convertMillisToDate(),
+                endDate = dateList.first().dateInMillis.convertMillisToDate()
+            )
         }
     }
 
@@ -94,9 +99,8 @@ class HomeViewModel @Inject constructor(
                                     )
                                 }
                             }
-                            // Fetch events after successful user info fetch
-                            getEvents(userId)
                         }
+
                         is Either.Error -> {
                             intent {
                                 reduce {
@@ -111,11 +115,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getEvents(userId: Int) {
+    fun getEvents(startDate: String, endDate: String) {
         viewModelScope.launch {
             getEventsUseCase.process(
                 RGetEventsUseCase.UCRequest(
-                    userId = userId
+                    startDate = startDate,
+                    endDate = endDate
                 )
             )
                 .collect { result ->
@@ -124,11 +129,12 @@ class HomeViewModel @Inject constructor(
                             intent {
                                 reduce {
                                     state.copy(
-                                        pupilList = result.data.events
+                                        classList = result.data.eventList
                                     )
                                 }
                             }
                         }
+
                         is Either.Error -> {
                             // Keep the dummy data if events fetch fails
                         }
@@ -165,10 +171,12 @@ class HomeViewModel @Inject constructor(
             postSideEffect(HomeScreenSideEffect.NavigateToAddEventScreen)
         }
     }
+
     fun Long.toDayName(): String {
         val formatter = SimpleDateFormat("EEE", Locale.getDefault())
         return formatter.format(Date(this))
     }
+
     fun Long.getDayNumber(): String {
         val formatter = SimpleDateFormat("dd", Locale.getDefault())
         return formatter.format(Date(this))

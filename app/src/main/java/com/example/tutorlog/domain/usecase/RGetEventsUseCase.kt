@@ -1,6 +1,8 @@
 package com.example.tutorlog.domain.usecase
 
-import com.example.tutorlog.domain.model.local.UIPupilClassInfo
+import com.example.tutorlog.domain.local_storage.LocalKey
+import com.example.tutorlog.domain.local_storage.PreferencesManager
+import com.example.tutorlog.domain.model.local.UIClassInfo
 import com.example.tutorlog.domain.usecase.base.Either
 import com.example.tutorlog.repository.IUserRepository
 import kotlinx.coroutines.flow.Flow
@@ -12,16 +14,19 @@ import javax.inject.Inject
 
 class RGetEventsUseCase @Inject constructor(
     private val userRepository: IUserRepository,
+    private val preferencesManager: PreferencesManager
 ) {
     suspend fun process(request: UCRequest): Flow<Either<UCResponse>> {
         return userRepository.getEvents(
-            userId = request.userId
+            userId = preferencesManager.getInt(LocalKey.USER_ID),
+            startDate = request.startDate,
+            endDate = request.endDate
         )
             .map { response ->
                 if (response.isSuccessful) {
                     val events = response.body()?.map { event ->
                         val (time, meridiem) = parseTime(event.start_time)
-                        UIPupilClassInfo(
+                        UIClassInfo(
                             isRepeat = event.repeat_pattern != null && event.repeat_pattern != "none",
                             time = time,
                             meridiem = meridiem,
@@ -30,7 +35,7 @@ class RGetEventsUseCase @Inject constructor(
                             description = event.description.orEmpty()
                         )
                     } ?: emptyList()
-                    Either.Success(UCResponse(events = events))
+                    Either.Success(UCResponse(eventList = events))
                 } else {
                     Either.Error(Exception("Error fetching events: ${response.code()} ${response.message()}"))
                 }
@@ -59,10 +64,11 @@ class RGetEventsUseCase @Inject constructor(
     }
 
     data class UCRequest(
-        val userId: Int
+        val startDate: String,
+        val endDate: String
     )
 
     data class UCResponse(
-        val events: List<UIPupilClassInfo>
+        val eventList: List<UIClassInfo>
     )
 }

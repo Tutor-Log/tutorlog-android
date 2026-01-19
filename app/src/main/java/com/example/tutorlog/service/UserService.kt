@@ -1,5 +1,6 @@
 package com.example.tutorlog.service
 
+import android.R
 import com.example.tutorlog.domain.model.remote.AddPupilPostBody
 import com.example.tutorlog.domain.model.remote.AddPupilResponse
 import com.example.tutorlog.domain.model.remote.AddPupilToGroupPostBody
@@ -85,6 +86,8 @@ interface UserService {
 
     @GET("events/")
     suspend fun getEvents(
-        @Query("owner_id") userId: Int
+        @Query("owner_id") userId: Int,
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String
     ): Response<List<GetEventsResponse>>
 }
