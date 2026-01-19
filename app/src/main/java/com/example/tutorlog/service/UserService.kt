@@ -11,6 +11,7 @@ import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
 import com.example.tutorlog.domain.model.remote.GetEventsResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
+import com.example.tutorlog.domain.model.remote.EventPupilDetailResponse
 import com.example.tutorlog.domain.model.remote.GetAllGroupMemberResponse
 import com.example.tutorlog.domain.model.remote.GetPupilResponse
 import com.example.tutorlog.domain.model.remote.HealthResponse
@@ -90,4 +91,10 @@ interface UserService {
         @Query("start_date") startDate: String,
         @Query("end_date") endDate: String
     ): Response<List<GetEventsResponse>>
+
+    @GET("events/{eventId}/pupils")
+    suspend fun getEventPupilList(
+        @Path("eventId") eventId: Int,
+        @Query("current_user_id") userId: Int,
+    ): Response<List<EventPupilDetailResponse>>
 }

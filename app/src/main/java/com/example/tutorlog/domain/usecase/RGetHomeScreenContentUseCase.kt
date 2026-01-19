@@ -41,12 +41,13 @@ class RGetHomeScreenContentUseCase @Inject constructor(
                     eventsResponse.body()?.map { event ->
                         val (time, meridiem) = parseTime(event.start_time)
                         UIClassInfo(
-                            isRepeat = event.repeat_pattern != null && event.repeat_pattern != "none",
+                            isRepeat = event.is_repeat_instance == true,
                             time = time,
                             meridiem = meridiem,
                             title = event.title.orEmpty(),
                             subtitle = event.event_type.orEmpty(),
-                            description = event.description.orEmpty()
+                            description = event.description.orEmpty(),
+                            id = event.id ?: 0
                         )
                     } ?: emptyList()
                 } else {
@@ -57,27 +58,6 @@ class RGetHomeScreenContentUseCase @Inject constructor(
             } else {
                 Either.Error(Exception("Error fetching users: ${userResponse.code()} ${userResponse.message()}"))
             }
-        }
-    }
-
-    private fun parseTime(startTime: String?): Pair<String, String> {
-        if (startTime.isNullOrEmpty()) {
-            return Pair("00:00", "AM")
-        }
-        return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-            inputFormat.timeZone = TimeZone.getTimeZone("UTC")
-            val date = inputFormat.parse(startTime) ?: return Pair("00:00", "AM")
-            
-            val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
-            val meridiemFormat = SimpleDateFormat("a", Locale.getDefault())
-            
-            val time = timeFormat.format(date)
-            val meridiem = meridiemFormat.format(date).uppercase()
-            
-            Pair(time, meridiem)
-        } catch (e: Exception) {
-            Pair("00:00", "AM")
         }
     }
 
@@ -98,4 +78,24 @@ fun String.toTitleCase(): String {
         .joinToString(" ") { word ->
             word.replaceFirstChar { it.uppercase() }
         }
+}
+
+fun parseTime(startTime: String?): Pair<String, String> {
+    if (startTime.isNullOrEmpty()) {
+        return Pair("00:00", "AM")
+    }
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val date = inputFormat.parse(startTime) ?: return Pair("00:00", "AM")
+
+        val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+        val meridiemFormat = SimpleDateFormat("a", Locale.getDefault())
+
+        val time = timeFormat.format(date)
+        val meridiem = meridiemFormat.format(date).uppercase()
+
+        Pair(time, meridiem)
+    } catch (e: Exception) {
+        Pair("00:00", "AM")
+    }
 }

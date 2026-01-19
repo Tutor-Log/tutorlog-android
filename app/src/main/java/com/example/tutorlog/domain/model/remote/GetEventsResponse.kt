@@ -14,5 +14,8 @@ data class GetEventsResponse(
     val repeat_until: String?,
     val start_time: String?,
     val title: String?,
-    val updated_at: String?
+    val updated_at: String?,
+    val is_repeat_instance: Boolean?,
+    val original_date: String?,
+    val instance_date: String?
 )

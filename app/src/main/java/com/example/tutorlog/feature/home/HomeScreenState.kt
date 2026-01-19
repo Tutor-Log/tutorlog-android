@@ -12,5 +12,7 @@ data class HomeScreenState(
     val userName: String = "",
     val selectedBottomTab: BottomBarTabTypes = BottomBarTabTypes.HOME,
     val classList: List<UIClassInfo> = emptyList(),
-    val dateList: List<UIDateInfo> = emptyList()
+    val dateList: List<UIDateInfo> = emptyList(),
+    val isEventLoading: Boolean = false,
+    val currentDate: String = ""
 )

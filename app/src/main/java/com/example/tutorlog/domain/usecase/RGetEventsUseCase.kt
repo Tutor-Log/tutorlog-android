@@ -27,12 +27,13 @@ class RGetEventsUseCase @Inject constructor(
                     val events = response.body()?.map { event ->
                         val (time, meridiem) = parseTime(event.start_time)
                         UIClassInfo(
-                            isRepeat = event.repeat_pattern != null && event.repeat_pattern != "none",
+                            isRepeat = event.is_repeat_instance == true,
                             time = time,
                             meridiem = meridiem,
                             title = event.title.orEmpty(),
                             subtitle = event.event_type.orEmpty(),
-                            description = event.description.orEmpty()
+                            description = event.description.orEmpty(),
+                            id = event.id ?: 0
                         )
                     } ?: emptyList()
                     Either.Success(UCResponse(eventList = events))
@@ -40,27 +41,6 @@ class RGetEventsUseCase @Inject constructor(
                     Either.Error(Exception("Error fetching events: ${response.code()} ${response.message()}"))
                 }
             }
-    }
-
-    private fun parseTime(startTime: String?): Pair<String, String> {
-        if (startTime.isNullOrEmpty()) {
-            return Pair("00:00", "AM")
-        }
-        return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-            inputFormat.timeZone = TimeZone.getTimeZone("UTC")
-            val date = inputFormat.parse(startTime) ?: return Pair("00:00", "AM")
-            
-            val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
-            val meridiemFormat = SimpleDateFormat("a", Locale.getDefault())
-            
-            val time = timeFormat.format(date)
-            val meridiem = meridiemFormat.format(date).uppercase()
-            
-            Pair(time, meridiem)
-        } catch (e: Exception) {
-            Pair("00:00", "AM")
-        }
     }
 
     data class UCRequest(

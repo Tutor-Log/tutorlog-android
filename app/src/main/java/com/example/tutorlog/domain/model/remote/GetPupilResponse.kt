@@ -1,5 +1,8 @@
 package com.example.tutorlog.domain.model.remote
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class GetPupilResponse(
     val created_at: String?,
     val date_of_birth: String?,

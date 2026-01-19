@@ -1,5 +1,6 @@
 package com.example.tutorlog.feature.home
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -25,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.BottomNavigationBar
@@ -32,12 +35,14 @@ import com.example.tutorlog.design.LocalColors
 import com.example.tutorlog.design.TFullScreenErrorComposable
 import com.example.tutorlog.design.TFullScreenLoaderComposable
 import com.example.tutorlog.domain.types.UIState
+import com.example.tutorlog.feature.event_detail.EventDetailNavArgs
 import com.example.tutorlog.feature.home.composables.DateSliderComposable
 import com.example.tutorlog.feature.home.composables.EventCardComposable
 import com.example.tutorlog.feature.home.composables.TopInfoBarComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AddEventScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.EventDetailScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.StudentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
@@ -52,14 +57,27 @@ fun HomeScreen(
 ) {
 
     val state by viewModel.collectAsState()
+    val context = LocalContext.current
     viewModel.collectSideEffect {
         when (it) {
-            HomeScreenSideEffect.NavigateToStudentsScreen -> {
+            is HomeScreenSideEffect.NavigateToStudentsScreen -> {
                 navigator.navigate(StudentScreenDestination)
             }
 
-            HomeScreenSideEffect.NavigateToAddEventScreen -> {
+            is HomeScreenSideEffect.NavigateToAddEventScreen -> {
                 navigator.navigate(AddEventScreenDestination)
+            }
+
+            is HomeScreenSideEffect.ShowToast -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            }
+
+            is HomeScreenSideEffect.NavigateToEventDetail -> {
+                navigator.navigate(EventDetailScreenDestination(
+                    navArgs = EventDetailNavArgs(
+                        eventId = it.eventId
+                    )
+                ))
             }
         }
     }
@@ -78,7 +96,10 @@ fun HomeScreen(
 
         UIState.ERROR -> {
             TFullScreenErrorComposable {
-                viewModel.getHomeScreenContent()
+                viewModel.getHomeScreenContent(
+                    startDate = state.currentDate,
+                    endDate = state.currentDate
+                )
             }
         }
 
@@ -144,7 +165,7 @@ fun InitializeHomeScreen(
             DateSliderComposable(
                 dayList = state.dateList,
                 onClick = {
-
+                    viewModel.onDateChanged(date = it)
                 }
             )
             Column(
@@ -154,16 +175,31 @@ fun InitializeHomeScreen(
                     .padding(horizontal = 24.dp)
                     .padding(top = 24.dp)
             ) {
-                state.classList.forEach { item ->
-                    EventCardComposable(
-                        isRepeat = item.isRepeat,
-                        time = item.time,
-                        meridiem = item.meridiem,
-                        title = item.title,
-                        subtitle = item.subtitle,
-                        description = item.description
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                if (state.isEventLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(32.dp),
+                            strokeWidth = 4.dp
+                        )
+                    }
+                } else {
+                    state.classList.forEach { item ->
+                        EventCardComposable(
+                            isRepeat = item.isRepeat,
+                            time = item.time,
+                            meridiem = item.meridiem,
+                            title = item.title,
+                            subtitle = item.subtitle,
+                            description = item.description,
+                            onClick = {
+                                viewModel.navigateToEventDetail(item.id)
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
         }

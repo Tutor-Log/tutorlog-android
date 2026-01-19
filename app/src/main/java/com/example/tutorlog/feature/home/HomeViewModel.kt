@@ -5,9 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.tutorlog.domain.model.local.UIDateInfo
 import com.example.tutorlog.domain.types.BottomBarTabTypes
 import com.example.tutorlog.domain.types.UIState
+import com.example.tutorlog.domain.usecase.RGetEventsUseCase
 import com.example.tutorlog.domain.usecase.RGetHomeScreenContentUseCase
 import com.example.tutorlog.domain.usecase.base.Either
-import com.example.tutorlog.utils.convertMillisToDate
+import com.example.tutorlog.utils.convertMillisToyyyyMMdd
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
@@ -22,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getHomeScreenContentUseCase: RGetHomeScreenContentUseCase
+    private val getHomeScreenContentUseCase: RGetHomeScreenContentUseCase,
+    private val getEventUseCase: RGetEventsUseCase
 ) : ContainerHost<HomeScreenState, HomeScreenSideEffect>, ViewModel() {
     override val container: Container<HomeScreenState, HomeScreenSideEffect> = container(
         HomeScreenState()
@@ -56,11 +58,14 @@ class HomeViewModel @Inject constructor(
             }
 
             reduce {
-                state.copy(dateList = dateList)
+                state.copy(
+                    dateList = dateList,
+                    currentDate = dateList.first().dateInMillis.convertMillisToyyyyMMdd()
+                )
             }
             getHomeScreenContent(
-                startDate = dateList.first().dateInMillis.convertMillisToDate(),
-                endDate = dateList.first().dateInMillis.convertMillisToDate()
+                startDate = dateList.first().dateInMillis.convertMillisToyyyyMMdd(),
+                endDate = dateList.first().dateInMillis.convertMillisToyyyyMMdd()
             )
         }
     }
@@ -138,6 +143,16 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun navigateToEventDetail(eventId: Int) {
+        intent {
+            postSideEffect(
+                HomeScreenSideEffect.NavigateToEventDetail(
+                    eventId = eventId
+                )
+            )
+        }
+    }
+
     fun Long.toDayName(): String {
         val formatter = SimpleDateFormat("EEE", Locale.getDefault())
         return formatter.format(Date(this))
@@ -146,5 +161,69 @@ class HomeViewModel @Inject constructor(
     fun Long.getDayNumber(): String {
         val formatter = SimpleDateFormat("dd", Locale.getDefault())
         return formatter.format(Date(this))
+    }
+
+    fun onDateChanged(date: Long) {
+        intent {
+            reduce {
+                state.copy(
+                    dateList = state.dateList.map {
+                        it.copy(
+                            isSelected = it.dateInMillis == date,
+                        )
+                    },
+                )
+            }
+        }
+        getEvents(
+            startDate = date.convertMillisToyyyyMMdd(),
+            endDate = date.convertMillisToyyyyMMdd()
+        )
+    }
+
+    fun getEvents(startDate: String, endDate: String) {
+        intent {
+            reduce {
+                state.copy(
+                    isEventLoading = true
+                )
+            }
+        }
+        viewModelScope.launch {
+            getEventUseCase.process(
+                request = RGetEventsUseCase.UCRequest(
+                    startDate = startDate,
+                    endDate = endDate
+                )
+            ).collect {
+                when (it) {
+                    is Either.Success -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    classList = it.data.eventList,
+                                    isEventLoading = false
+                                )
+                            }
+                        }
+                    }
+
+                    is Either.Error -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    isEventLoading = false
+                                )
+                            }
+                            postSideEffect(
+                                HomeScreenSideEffect.ShowToast(
+                                    message = "Something went wrong"
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -22,6 +22,7 @@ import com.example.tutorlog.feature.add_event.composable.AddEventScreenComposabl
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AddEventScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.StudentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.orbitmvi.orbit.compose.collectAsState
@@ -43,7 +44,7 @@ fun AddEventScreen(
                 Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
             }
             is AddEventSideEffect.NavigateToHomeScreen -> {
-                navigator.navigate(StudentScreenDestination) {
+                navigator.navigate(HomeScreenDestination) {
                     popUpTo(AddEventScreenDestination) {
                         inclusive = true
                     }

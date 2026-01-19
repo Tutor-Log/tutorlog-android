@@ -3,6 +3,7 @@ package com.example.tutorlog.feature.home.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -17,6 +18,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,7 +39,7 @@ fun EventCardComposable(
     title: String,
     subtitle: String,
     description: String,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit
 ) {
     val badgeBg = if (isRepeat) ColorBlueBg else Color(0xFF581c87).copy(0.3f)
     val badgeText = if (isRepeat) ColorBlueText else Color(0xFFd8b4fe)
@@ -48,8 +50,14 @@ fun EventCardComposable(
             .clip(RoundedCornerShape(24.dp))
             .background(ColorSurface)
             .border(1.dp, ColorBorder.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-            .clickable { onClick() }
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = {
+                    onClick.invoke()
+                }
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Time Column
@@ -138,7 +146,8 @@ private fun PreviewEventCard() {
             title = "Jane Doe",
             subtitle = "Violin • Grade 3",
             description = "Reviewing Vivaldi Concerto in A Minor.",
-            isRepeat = false
+            isRepeat = false,
+            onClick = {}
         )
 
         // Preview 2: Group Class
@@ -148,7 +157,8 @@ private fun PreviewEventCard() {
             title = "Advanced Quartet",
             subtitle = "Ensemble Rehearsal",
             description = "Preparing for Winter Recital.",
-            isRepeat = true
+            isRepeat = true,
+            onClick = {}
         )
 
     }
