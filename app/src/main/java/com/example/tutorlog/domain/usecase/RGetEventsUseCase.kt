@@ -44,12 +44,12 @@ class RGetEventsUseCase @Inject constructor(
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
             inputFormat.timeZone = TimeZone.getTimeZone("UTC")
-            val date = inputFormat.parse(startTime)
+            val date = inputFormat.parse(startTime) ?: return Pair("00:00", "AM")
             
             val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
             val meridiemFormat = SimpleDateFormat("a", Locale.getDefault())
             
-            val time = timeFormat.format(date!!)
+            val time = timeFormat.format(date)
             val meridiem = meridiemFormat.format(date).uppercase()
             
             Pair(time, meridiem)
