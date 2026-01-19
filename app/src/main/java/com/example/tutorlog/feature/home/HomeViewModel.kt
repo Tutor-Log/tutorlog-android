@@ -111,11 +111,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getEvents(ownerId: Int) {
+    private fun getEvents(userId: Int) {
         viewModelScope.launch {
             getEventsUseCase.process(
                 RGetEventsUseCase.UCRequest(
-                    ownerId = ownerId
+                    userId = userId
                 )
             )
                 .collect { result ->

@@ -15,7 +15,7 @@ class RGetEventsUseCase @Inject constructor(
 ) {
     suspend fun process(request: UCRequest): Flow<Either<UCResponse>> {
         return userRepository.getEvents(
-            ownerId = request.ownerId
+            userId = request.userId
         )
             .map { response ->
                 if (response.isSuccessful) {
@@ -59,7 +59,7 @@ class RGetEventsUseCase @Inject constructor(
     }
 
     data class UCRequest(
-        val ownerId: Int
+        val userId: Int
     )
 
     data class UCResponse(

@@ -43,6 +43,6 @@ interface IUserRepository {
 
     suspend fun createEvent(userId: Int, createEventPostBody: CreateEventPostBody): Flow<Response<CreateEventResponse>>
 
-    suspend fun getEvents(ownerId: Int): Flow<Response<List<GetEventsResponse>>>
+    suspend fun getEvents(userId: Int): Flow<Response<List<GetEventsResponse>>>
 
 }

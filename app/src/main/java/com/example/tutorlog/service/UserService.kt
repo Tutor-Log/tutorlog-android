@@ -85,6 +85,6 @@ interface UserService {
 
     @GET("events/")
     suspend fun getEvents(
-        @Query("owner_id") ownerId: Int
+        @Query("owner_id") userId: Int
     ): Response<List<GetEventsResponse>>
 }
