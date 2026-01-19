@@ -2,12 +2,9 @@ package com.example.tutorlog.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tutorlog.domain.local_storage.LocalKey
-import com.example.tutorlog.domain.local_storage.PreferencesManager
 import com.example.tutorlog.domain.model.local.UIDateInfo
 import com.example.tutorlog.domain.types.BottomBarTabTypes
 import com.example.tutorlog.domain.types.UIState
-import com.example.tutorlog.domain.usecase.RGetEventsUseCase
 import com.example.tutorlog.domain.usecase.RGetHomeScreenContentUseCase
 import com.example.tutorlog.domain.usecase.base.Either
 import com.example.tutorlog.utils.convertMillisToDate
@@ -25,17 +22,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val preferencesManager: PreferencesManager,
-    private val getHomeScreenContentUseCase: RGetHomeScreenContentUseCase,
-    private val getEventsUseCase: RGetEventsUseCase
+    private val getHomeScreenContentUseCase: RGetHomeScreenContentUseCase
 ) : ContainerHost<HomeScreenState, HomeScreenSideEffect>, ViewModel() {
     override val container: Container<HomeScreenState, HomeScreenSideEffect> = container(
         HomeScreenState()
     )
 
     init {
-
-        getHomeScreenContent()
         getDateList()
     }
 
@@ -65,14 +58,14 @@ class HomeViewModel @Inject constructor(
             reduce {
                 state.copy(dateList = dateList)
             }
-            getEvents(
+            getHomeScreenContent(
                 startDate = dateList.first().dateInMillis.convertMillisToDate(),
                 endDate = dateList.first().dateInMillis.convertMillisToDate()
             )
         }
     }
 
-    fun getHomeScreenContent() {
+    fun getHomeScreenContent(startDate: String, endDate: String) {
         viewModelScope.launch {
             intent {
                 reduce {
@@ -81,10 +74,10 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             }
-            val userId = preferencesManager.getInt(LocalKey.USER_ID)
             getHomeScreenContentUseCase.process(
                 RGetHomeScreenContentUseCase.UCRequest(
-                    userId = userId
+                    startDate = startDate,
+                    endDate = endDate
                 )
             )
                 .collect { result ->
@@ -95,6 +88,7 @@ class HomeViewModel @Inject constructor(
                                     state.copy(
                                         userName = result.data.userInfo.name,
                                         image = result.data.userInfo.iamge,
+                                        classList = result.data.eventList,
                                         uiState = UIState.SUCCESS
                                     )
                                 }
@@ -109,34 +103,6 @@ class HomeViewModel @Inject constructor(
                                     )
                                 }
                             }
-                        }
-                    }
-                }
-        }
-    }
-
-    fun getEvents(startDate: String, endDate: String) {
-        viewModelScope.launch {
-            getEventsUseCase.process(
-                RGetEventsUseCase.UCRequest(
-                    startDate = startDate,
-                    endDate = endDate
-                )
-            )
-                .collect { result ->
-                    when (result) {
-                        is Either.Success -> {
-                            intent {
-                                reduce {
-                                    state.copy(
-                                        classList = result.data.eventList
-                                    )
-                                }
-                            }
-                        }
-
-                        is Either.Error -> {
-                            // Keep the dummy data if events fetch fails
                         }
                     }
                 }
