@@ -7,6 +7,7 @@ import com.example.tutorlog.domain.local_storage.PreferencesManager
 import com.example.tutorlog.domain.model.local.UIDateInfo
 import com.example.tutorlog.domain.types.BottomBarTabTypes
 import com.example.tutorlog.domain.types.UIState
+import com.example.tutorlog.domain.usecase.RGetEventsUseCase
 import com.example.tutorlog.domain.usecase.RGetHomeScreenContentUseCase
 import com.example.tutorlog.domain.usecase.base.Either
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
-    private val getHomeScreenContentUseCase: RGetHomeScreenContentUseCase
+    private val getHomeScreenContentUseCase: RGetHomeScreenContentUseCase,
+    private val getEventsUseCase: RGetEventsUseCase
 ) : ContainerHost<HomeScreenState, HomeScreenSideEffect>, ViewModel() {
     override val container: Container<HomeScreenState, HomeScreenSideEffect> = container(
         HomeScreenState()
@@ -74,9 +76,10 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             }
+            val userId = preferencesManager.getInt(LocalKey.USER_ID)
             getHomeScreenContentUseCase.process(
                 RGetHomeScreenContentUseCase.UCRequest(
-                    userId = preferencesManager.getInt(LocalKey.USER_ID)
+                    userId = userId
                 )
             )
                 .collect { result ->
@@ -91,6 +94,8 @@ class HomeViewModel @Inject constructor(
                                     )
                                 }
                             }
+                            // Fetch events after successful user info fetch
+                            getEvents(userId)
                         }
                         is Either.Error -> {
                             intent {
@@ -100,6 +105,32 @@ class HomeViewModel @Inject constructor(
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun getEvents(ownerId: Int) {
+        viewModelScope.launch {
+            getEventsUseCase.process(
+                RGetEventsUseCase.UCRequest(
+                    ownerId = ownerId
+                )
+            )
+                .collect { result ->
+                    when (result) {
+                        is Either.Success -> {
+                            intent {
+                                reduce {
+                                    state.copy(
+                                        pupilList = result.data.events
+                                    )
+                                }
+                            }
+                        }
+                        is Either.Error -> {
+                            // Keep the dummy data if events fetch fails
                         }
                     }
                 }

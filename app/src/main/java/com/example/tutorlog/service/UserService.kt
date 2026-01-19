@@ -7,6 +7,7 @@ import com.example.tutorlog.domain.model.remote.AddPupilToGroupResponseItem
 import com.example.tutorlog.domain.model.remote.CreateEventPostBody
 import com.example.tutorlog.domain.model.remote.CreateEventResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupPostBody
+import com.example.tutorlog.domain.model.remote.GetEventsResponse
 import com.example.tutorlog.domain.model.remote.CreateGroupResponse
 import com.example.tutorlog.domain.model.remote.CreateUserPostBody
 import com.example.tutorlog.domain.model.remote.GetAllGroupMemberResponse
@@ -81,4 +82,9 @@ interface UserService {
         @Query("current_user_id") userId: Int,
         @Body createEventPostBody: CreateEventPostBody
     ): Response<CreateEventResponse>
+
+    @GET("events/")
+    suspend fun getEvents(
+        @Query("owner_id") ownerId: Int
+    ): Response<List<GetEventsResponse>>
 }
