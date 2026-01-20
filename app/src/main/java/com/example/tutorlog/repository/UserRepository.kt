@@ -279,4 +279,24 @@ class UserRepository @Inject constructor(
             )
         }
     }
+
+    override suspend fun deleteEvent(
+        eventId: Int,
+        userId: Int
+    ): Flow<Response<Unit>> = flow {
+        try {
+            val response = userService.deleteEvent(
+                userId = userId,
+                eventId = eventId,
+            )
+            emit(response)
+        } catch (e: Exception) {
+            emit(
+                Response.error(
+                    500,
+                    okhttp3.ResponseBody.create(null, "Exception: ${e.localizedMessage}")
+                )
+            )
+        }
+    }
 }

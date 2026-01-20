@@ -2,7 +2,7 @@ package com.example.tutorlog.feature.home
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,22 +13,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.tutorlog.design.BottomNavigationBar
 import com.example.tutorlog.design.LocalColors
@@ -38,10 +45,13 @@ import com.example.tutorlog.domain.types.UIState
 import com.example.tutorlog.feature.event_detail.EventDetailNavArgs
 import com.example.tutorlog.feature.home.composables.DateSliderComposable
 import com.example.tutorlog.feature.home.composables.EventCardComposable
+import com.example.tutorlog.feature.home.composables.ExpandableFabMenu
 import com.example.tutorlog.feature.home.composables.TopInfoBarComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AddEventScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.AddGroupScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.AddPupilScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.EventDetailScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.StudentScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -73,11 +83,25 @@ fun HomeScreen(
             }
 
             is HomeScreenSideEffect.NavigateToEventDetail -> {
-                navigator.navigate(EventDetailScreenDestination(
-                    navArgs = EventDetailNavArgs(
-                        eventId = it.eventId
+                navigator.navigate(
+                    EventDetailScreenDestination(
+                        navArgs = EventDetailNavArgs(
+                            eventId = it.eventId,
+                            title = it.title,
+                            description = it.description,
+                            date = it.date,
+                            time = it.time
+                        )
                     )
-                ))
+                )
+            }
+
+            is HomeScreenSideEffect.NavigateAddGroupScreen -> {
+                navigator.navigate(AddGroupScreenDestination)
+            }
+
+            is HomeScreenSideEffect.NavigateAddPupilScreen -> {
+                navigator.navigate(AddPupilScreenDestination)
             }
         }
     }
@@ -133,26 +157,17 @@ fun InitializeHomeScreen(
         },
         floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(
-                        color = LocalColors.LightGreen,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .clickable {
-                        viewModel.navigateToAddEvent()
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "",
-                    tint = LocalColors.Black,
-                    modifier = Modifier
-                        .size(24.dp)
-                )
-            }
+            ExpandableFabMenu(
+                onAddEvent = {
+                    viewModel.navigateToAddEvent()
+                },
+                onAddGroup = {
+                    viewModel.navigateToAddGroup()
+                },
+                onAddPupil = {
+                    viewModel.navigateToAddPupil()
+                }
+            )
         }
     ) { contentPadding ->
         Column(
@@ -186,19 +201,64 @@ fun InitializeHomeScreen(
                         )
                     }
                 } else {
-                    state.classList.forEach { item ->
-                        EventCardComposable(
-                            isRepeat = item.isRepeat,
-                            time = item.time,
-                            meridiem = item.meridiem,
-                            title = item.title,
-                            subtitle = item.subtitle,
-                            description = item.description,
-                            onClick = {
-                                viewModel.navigateToEventDetail(item.id)
+                    if (state.classList.isEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .padding(top = 200.dp).fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "No class scheduled yet",
+                                color = Color.White,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Black,
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Add a class to start",
+                                color = Color.Gray,
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = {
+                                    viewModel.navigateToAddEvent()
+                                },
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .fillMaxWidth(0.5f),
+                                colors = ButtonDefaults.buttonColors(containerColor = LocalColors.PrimaryGreen),
+                                shape = CircleShape
+                            ) {
+                                Text(
+                                    "Schedule Event",
+                                    color = Color.Black,
+                                    fontSize = 18.sp,
+                                )
                             }
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                    } else {
+                        state.classList.forEach { item ->
+                            EventCardComposable(
+                                isRepeat = item.isRepeat,
+                                time = item.time,
+                                meridiem = item.meridiem,
+                                title = item.title,
+                                subtitle = item.subtitle,
+                                description = item.description,
+                                onClick = {
+                                    viewModel.navigateToEventDetail(
+                                        item.id,
+                                        title = item.title,
+                                        description = item.description,
+                                        date = state.currentDate,
+                                        time = "${item.time} ${item.meridiem}"
+                                    )
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
                 }
             }

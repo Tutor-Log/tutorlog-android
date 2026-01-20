@@ -5,5 +5,10 @@ import com.example.tutorlog.domain.types.UIState
 
 data class EventDetailState(
     val uiState: UIState = UIState.NONE,
-    val pupilList: List<UIPupilInfo> = emptyList()
+    val pupilList: List<UIPupilInfo> = emptyList(),
+    val isButtonLoading: Boolean = false,
+    val title: String = "",
+    val description: String = "",
+    val date: String = "",
+    val time: String = ""
 )

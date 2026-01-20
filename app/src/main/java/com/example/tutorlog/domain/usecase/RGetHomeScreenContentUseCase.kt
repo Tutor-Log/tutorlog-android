@@ -47,7 +47,8 @@ class RGetHomeScreenContentUseCase @Inject constructor(
                             title = event.title.orEmpty(),
                             subtitle = event.event_type.orEmpty(),
                             description = event.description.orEmpty(),
-                            id = event.id ?: 0
+                            id = event.id ?: 0,
+                            endTime = parseTime(event.end_time.orEmpty()).first
                         )
                     } ?: emptyList()
                 } else {

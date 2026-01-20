@@ -1,4 +1,6 @@
 package com.example.tutorlog.feature.event_detail
 
-interface EventDetailSideEffect {
+sealed interface EventDetailSideEffect {
+
+    data class ShowToast(val message: String) : EventDetailSideEffect
 }

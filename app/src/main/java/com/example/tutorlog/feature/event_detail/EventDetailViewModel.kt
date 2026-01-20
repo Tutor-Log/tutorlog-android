@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tutorlog.domain.types.UIState
+import com.example.tutorlog.domain.usecase.RDeleteEventUseCase
 import com.example.tutorlog.domain.usecase.RGetEventDetailUseCase
 import com.example.tutorlog.domain.usecase.base.Either
 import com.ramcosta.composedestinations.generated.navArgs
@@ -18,6 +19,7 @@ import javax.inject.Inject
 class EventDetailViewModel @Inject constructor(
     private val getEventPupilList: RGetEventDetailUseCase,
     private val savedStateHandle: SavedStateHandle,
+    private val deleteEventUseCase: RDeleteEventUseCase
 ) :
     ContainerHost<EventDetailState, EventDetailSideEffect>, ViewModel() {
 
@@ -33,7 +35,11 @@ class EventDetailViewModel @Inject constructor(
         intent {
             reduce {
                 state.copy(
-                    uiState = UIState.LOADING
+                    uiState = UIState.LOADING,
+                    title = savedStateHandle.navArgs<EventDetailNavArgs>().title,
+                    description = savedStateHandle.navArgs<EventDetailNavArgs>().description,
+                    date = savedStateHandle.navArgs<EventDetailNavArgs>().date,
+                    time = savedStateHandle.navArgs<EventDetailNavArgs>().time
                 )
             }
         }
@@ -62,6 +68,48 @@ class EventDetailViewModel @Inject constructor(
                                     uiState = UIState.ERROR
                                 )
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun onDeleteEvent(
+        eventId: Int
+    ) {
+        intent {
+            reduce {
+                state.copy(
+                    isButtonLoading = true
+                )
+            }
+        }
+        viewModelScope.launch {
+            deleteEventUseCase.process(
+                request = RDeleteEventUseCase.UCRequest(
+                    eventId = eventId
+                )
+            ).collect {
+                when(it) {
+                    is Either.Success -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    isButtonLoading = false
+                                )
+                            }
+                            postSideEffect(EventDetailSideEffect.ShowToast("Event deleted"))
+                        }
+                    }
+                    is Either.Error -> {
+                        intent {
+                            reduce {
+                                state.copy(
+                                    isButtonLoading = false
+                                )
+                            }
+                            postSideEffect(EventDetailSideEffect.ShowToast("Something went wrong"))
                         }
                     }
                 }

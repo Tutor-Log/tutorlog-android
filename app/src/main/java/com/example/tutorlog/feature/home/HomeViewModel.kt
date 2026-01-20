@@ -60,7 +60,7 @@ class HomeViewModel @Inject constructor(
             reduce {
                 state.copy(
                     dateList = dateList,
-                    currentDate = dateList.first().dateInMillis.convertMillisToyyyyMMdd()
+                    currentDate = dateList.first().dateInMillis.convertMillisToyyyyMMdd(),
                 )
             }
             getHomeScreenContent(
@@ -142,12 +142,32 @@ class HomeViewModel @Inject constructor(
             postSideEffect(HomeScreenSideEffect.NavigateToAddEventScreen)
         }
     }
+    fun navigateToAddPupil() {
+        intent {
+            postSideEffect(HomeScreenSideEffect.NavigateAddPupilScreen)
+        }
+    }
+    fun navigateToAddGroup() {
+        intent {
+            postSideEffect(HomeScreenSideEffect.NavigateAddGroupScreen)
+        }
+    }
 
-    fun navigateToEventDetail(eventId: Int) {
+    fun navigateToEventDetail(
+        eventId: Int,
+        title: String,
+        description: String,
+        date: String,
+        time: String
+    ) {
         intent {
             postSideEffect(
                 HomeScreenSideEffect.NavigateToEventDetail(
-                    eventId = eventId
+                    eventId = eventId,
+                    title = title,
+                    description = description,
+                    date = date,
+                    time = time
                 )
             )
         }
