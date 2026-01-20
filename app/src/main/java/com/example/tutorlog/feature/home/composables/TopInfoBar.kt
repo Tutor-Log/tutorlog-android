@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,11 +42,11 @@ fun TopInfoBarComposable(
                 .crossfade(true)
                 .build(),
             contentDescription = "",
-            modifier = Modifier.size(40.dp)
-                .clip(shape = RoundedCornerShape(4.dp))
+            modifier = Modifier.size(48.dp)
+                .clip(shape = CircleShape)
                 .background(color = LocalColors.Gray200)
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = "Hi, $name",
             color = LocalColors.White,

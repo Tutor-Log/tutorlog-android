@@ -48,4 +48,6 @@ interface IUserRepository {
 
     suspend fun getEventPupilList(userId: Int, eventId: Int): Flow<Response<List<EventPupilDetailResponse>>>
 
+    suspend fun deleteEvent(eventId: Int, userId: Int): Flow<Response<Unit>>
+
 }
