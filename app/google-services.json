@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:993707221030:android:8d047a9ef86e9c404bc6e7",
         "android_client_info": {
-          "package_name": "com.example.tutorlog"
+          "package_name": "com.tutorlog.app"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "993707221030-qbs8f3vppvgfrg9lniibeqgn7fs064vb.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.tutorlog",
+            "package_name": "com.tutorlog.app",
             "certificate_hash": "96912ce9b3196447856041a754f2fd3fd6f883c4"
           }
         },

@@ -38,7 +38,7 @@ cd tutorLog
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Create a new project or use an existing one
-3. Add an Android app with package name: `com.example.tutorlog`
+3. Add an Android app with package name: `com.tutorlog.app`
 4. Download `google-services.json` and place it in the `app/` directory
 5. Enable Google Sign-In in Firebase Authentication
 
@@ -77,7 +77,7 @@ Or simply open the project in Android Studio and click Run.
 
 ### Minimum SDK Requirements
 
-- **minSdk**: 24 (Android 7.0)
+- **minSdk**: 26 (Android 8.0)
 - **targetSdk**: 35 (Android 15)
 - **compileSdk**: 35
 

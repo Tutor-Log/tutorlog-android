@@ -1,0 +1,109 @@
+package com.tutorlog.app.feature.login
+
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.tutorlog.app.design.LocalColors
+import com.tutorlog.app.design.TFullScreenErrorComposable
+import com.tutorlog.app.design.TFullScreenLoaderComposable
+import com.tutorlog.app.domain.types.UIState
+import com.tutorlog.app.feature.login.composables.LoginComposable
+import com.tutorlog.app.utils.GoogleSignInUtils
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
+
+@Destination<RootGraph>
+@Composable
+fun LoginScreen(
+    navigator: DestinationsNavigator,
+    modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
+
+    val state by viewModel.collectAsState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
+
+
+    viewModel.collectSideEffect {
+        when (it) {
+            is LoginScreenSideEffect.SignInWithGoogle -> {
+                GoogleSignInUtils.doGoogleSignIn(
+                    context = context,
+                    scope = scope,
+                    launcher = launcher,
+                    login = { userInfo ->
+                        viewModel.createUser(
+                            userInfo = userInfo
+                        )
+                    },
+                    onCancel = {
+                        viewModel.onSignInCancel()
+                    }
+                )
+            }
+
+            is LoginScreenSideEffect.NavigateToHomeScreen -> {
+                navigator.navigate(HomeScreenDestination)
+            }
+
+            is LoginScreenSideEffect.ShowToast -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
+    when(state.uiState) {
+        UIState.ERROR -> {
+            TFullScreenErrorComposable(
+                onRetryClick = {
+                    viewModel.checkBEhealth()
+                }
+            )
+        }
+
+        UIState.LOADING -> {
+            TFullScreenLoaderComposable()
+        }
+        UIState.SUCCESS -> {
+            Scaffold(
+                modifier = modifier
+                    .background(color = LocalColors.BackgroundDefaultDark)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .fillMaxSize()
+            ) { contentPadding ->
+                LoginComposable(
+                    modifier = Modifier
+                        .padding(contentPadding),
+                    onGoogleSignInClick = {
+                        viewModel.onSignIn()
+                    },
+                    isLoading = state.isLoading
+                )
+            }
+        }
+        else -> {}
+    }
+}
