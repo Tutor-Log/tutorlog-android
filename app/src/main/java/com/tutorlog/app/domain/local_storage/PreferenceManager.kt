@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 
 class PreferencesManager(context: Context) {
     private val sharedPreferences: SharedPreferences =
-        context.getSharedPreferences("app_preferences", Context. MODE_PRIVATE)
+        context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
 
     // Save String
     fun saveString(key:  String, value: String) {
