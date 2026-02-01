@@ -7,17 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:993707221030:android:8d047a9ef86e9c404bc6e7",
+        "mobilesdk_app_id": "1:993707221030:android:d8b0807ccf903da44bc6e7",
         "android_client_info": {
-          "package_name": "com.example.tutorlog"
+          "package_name": "com.tutorlog.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "993707221030-qbs8f3vppvgfrg9lniibeqgn7fs064vb.apps.googleusercontent.com",
+          "client_id": "993707221030-162386hs2tnua6ogt1k0b6nh67sbg58l.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.tutorlog",
+            "package_name": "com.tutorlog.app",
             "certificate_hash": "96912ce9b3196447856041a754f2fd3fd6f883c4"
           }
         },
@@ -35,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "993707221030-o84ll3vv0v6jmhb3vkjdi9k2eosh2439.apps.googleusercontent.com",
+              "client_id": "993707221030-a3fqsc77626t2sridno50ccdmumo5ru7.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

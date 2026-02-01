@@ -22,8 +22,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.tutorlog" />
-                  <option name="mobileSdkAppId" value="1:993707221030:android:8d047a9ef86e9c404bc6e7" />
+                  <option name="appId" value="com.tutorlog.app" />
+                  <option name="mobileSdkAppId" value="1:993707221030:android:d8b0807ccf903da44bc6e7" />
                   <option name="projectId" value="tutorlog-dd20b" />
                   <option name="projectNumber" value="993707221030" />
                 </ConnectionSetting>
