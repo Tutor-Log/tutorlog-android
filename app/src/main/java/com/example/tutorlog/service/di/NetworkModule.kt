@@ -1,7 +1,6 @@
 package com.example.tutorlog.service.di
 
 import android.content.Context
-import com.example.tutorlog.BuildConfig
 import com.example.tutorlog.domain.local_storage.PreferencesManager
 import com.example.tutorlog.service.UserService
 import dagger.Module
@@ -22,17 +21,13 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        val builder = OkHttpClient.Builder()
-
-        // Only enable logging in debug builds
-        if (BuildConfig.ENABLE_LOGGING) {
-            val loggingInterceptor = HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            }
-            builder.addInterceptor(loggingInterceptor)
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
         }
 
-        return builder.build()
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
     }
 
     @Provides
