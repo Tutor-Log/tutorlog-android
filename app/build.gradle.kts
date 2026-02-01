@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.tutorlog.app"
+    namespace = "com.example.tutorlog"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.tutorlog.app"
+        applicationId = "com.example.tutorlog"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

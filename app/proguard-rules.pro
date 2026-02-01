@@ -31,7 +31,7 @@
 # Gson
 -keepattributes *Annotation*
 -keep class com.google.gson.stream.** { *; }
--keep class com.tutorlog.app.domain.model.** { *; }
+-keep class com.example.tutorlog.domain.model.** { *; }
 
 # OkHttp
 -dontwarn okhttp3.**
