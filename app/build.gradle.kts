@@ -26,14 +26,19 @@ android {
             arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
         }
     }
-
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
+            buildConfigField("Boolean", "ENABLE_LOGGING", "true")
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("Boolean", "ENABLE_LOGGING", "false")
         }
     }
     compileOptions {
@@ -45,6 +50,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     // Remove composeOptions - not needed with compose-compiler plugin
     packaging {
