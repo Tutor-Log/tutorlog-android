@@ -22,16 +22,13 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-
         val builder = OkHttpClient.Builder()
-
         if (BuildConfig.ENABLE_LOGGING) {
             val loggingInterceptor = HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             }
             builder.addInterceptor(loggingInterceptor)
         }
-
         return builder.build()
     }
 
